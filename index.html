@@ -50,8 +50,8 @@ window.onload = function() {
   function getImageOffset(){
 
     var pointer = game.input.activePointer;
-    var x = Math.floor(pointer.x) - landAnchor.centerX + 200;
-    var y = Math.floor(pointer.y) - landAnchor.centerY + 200;
+    var x = Math.floor(pointer.x) - landAnchor.centerX + 180;
+    var y = Math.floor(pointer.y) - landAnchor.centerY + 180;
 
 
     return[x,y];
@@ -67,11 +67,11 @@ window.onload = function() {
     mask.update();
 
     land.alphaMask(mask, 'land');
+    landAnchor.update();
     land.update();
     land.replaceRGB(0,0,0,255,0,0,0,0);
     land.update();
 
-    landAnchor.update();
   }
 
 
@@ -99,7 +99,6 @@ window.onload = function() {
     land.update();
     land.draw('land');
     // Make the babby spin
-    landAnchor.angle = -100;
     // game.add.tween(landAnchor).to(
     //   /*properties*/{angle: 360},
     //   /*duration*/2400,
