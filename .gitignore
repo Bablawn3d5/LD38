@@ -3,6 +3,7 @@
 
 TypeScriptHTMLApp1.*
 web.*config
+app.*
 
 # User-specific files
 *.suo
