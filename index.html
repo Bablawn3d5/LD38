@@ -11,8 +11,9 @@
 
 window.onload = function() {
 
-  var game = new Phaser.Game(800, 600, Phaser.AUTO, '', 
-    { init: init, preload: preload, create: create, update: update, render:render });  
+  var game = new Phaser.Game(800, 600, Phaser.AUTO, '',
+    { init: init, preload: preload, create: create, update: update, render:render });
+
   var land;   // Logo
   var sprite; // Sprite
   var bmd;    // Canvas bitmap
@@ -97,6 +98,7 @@ window.onload = function() {
         level_clicked();
     }
     sprite.update();
+    game.debug.text("FPS: "+game.time.fps, 0, 599);
   }
 
   function render () {
