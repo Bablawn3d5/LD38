@@ -49,6 +49,8 @@ window.onload = function() {
 
 
   function preload () {
+    // This needs to be set to "anonymous" for it to work under CDNs
+    game.load.crossOrigin = "Anonymous"
     game.load.image('logo', 'assets/phaser.png');
     game.load.image('sprite', 'assets/Sprite-0001.png');
   }
