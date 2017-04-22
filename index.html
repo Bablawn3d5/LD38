@@ -76,18 +76,15 @@ window.onload = function() {
 
   }
 
-
   function preload () {
     // This needs to be set to "anonymous" for it to work under CDNs
     game.load.crossOrigin = "Anonymous"
-    game.load.image('logo', 'assets/phaser.png');
     game.load.image('sprite', 'assets/Sprite-0001.png');
     game.load.image('land', 'assets/planet.png');
   }
 
   function hitPlanet (body1, body2) {
     body2.sprite.alpha -= 0.1;
-
   }
 
   function create () {
@@ -135,19 +132,22 @@ window.onload = function() {
 
     game.physics.p2.updateBoundsCollisionGroup();
 
+    //var missiles = game.add.group();
+    //missiles.enableBody = true;
+    //missiles.physicsBodyType = Phaser.Physics.P2JS;
+    //for i in missiles, set collision group
+
     game.physics.p2.enable(sprite, physDebug);
     game.physics.p2.enable(landAnchor, physDebug);
 
     sprite.body.fixedRotation = true;
     sprite.body.setCircle(16);
     sprite.body.setCollisionGroup(missileCollisionGroup);
+    sprite.body.collides(planetCollisionGroup, hitPlanet, this);
 
     landAnchor.body.setCircle(180);
     landAnchor.body.setCollisionGroup(planetCollisionGroup);
-
-    sprite.body.collides([planetCollisionGroup, missileCollisionGroup]);
-
-    sprite.body.collides(planetCollisionGroup, hitPlanet, this);
+    landAnchor.body.collides(missileCollisionGroup, hitPlanet, this);
     // === Physics End ====
 
     cursors = game.input.keyboard.createCursorKeys();
