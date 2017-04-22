@@ -40,12 +40,13 @@ window.onload = function() {
     var x = Math.floor(pointer.x);
     var y = Math.floor(pointer.y);
 
-    mask.circle(x,y, 16, 'rgba(1,1,1,255)');
+    mask.circle(x,y,16,'rgba(0,0,0,255)');
     mask.update();
 
     land.alphaMask(mask, 'land');
     land.update();
-    land.replaceRGB(1,1,1,255,0,0,0,0);
+    land.replaceRGB(0,0,0,255,0,0,0,0);
+    land.update();
   }
 
 
