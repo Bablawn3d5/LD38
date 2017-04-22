@@ -1,17 +1,20 @@
 <!doctype html>
 <html>
 <head>
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+}
+</style>
 <meta charset="UTF-8" />
 <title>LD38: A Small World</title>
 <script src="js/phaser.min.js"></script>
 </head>
-<body>
-
-<script type="text/javascript">
-
+<body><script type="text/javascript">
 window.onload = function() {
 
-  var game = new Phaser.Game(800, 600, Phaser.AUTO, 'LD38: A Small World',
+  var game = new Phaser.Game(1280,720, Phaser.AUTO, 'LD38: A Small World',
     { init: init, preload: preload, create: create, update: update, render:render }, false, false);
 
   var land;   // Logo
@@ -21,7 +24,12 @@ window.onload = function() {
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.pageAlignHorizontally;
+    game.scale.pageAlignVertically;
     Phaser.Canvas.setImageRenderingCrisp(game.canvas);
+    game.stage.smoothed = true;
+
     //game.world.setBounds(0, 0, 992, 480);
   }
 
@@ -55,7 +63,7 @@ window.onload = function() {
     game.load.crossOrigin = "Anonymous"
     game.load.image('logo', 'assets/phaser.png');
     game.load.image('sprite', 'assets/Sprite-0001.png');
-    game.load.image('land', 'assets/Sprite-0003.png');
+    game.load.image('land', 'assets/planet.png');
   }
 
   function create () {
@@ -118,8 +126,5 @@ window.onload = function() {
   }
 
 };
-
-</script>
-
-</body>
+</script></body>
 </html>
