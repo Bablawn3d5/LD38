@@ -50,6 +50,7 @@ window.onload = function() {
     var x = Math.floor(pointer.x) - landAnchor.centerX + 200;
     var y = Math.floor(pointer.y) - landAnchor.centerY + 200;
 
+
     return[x,y];
   }
 
@@ -92,6 +93,17 @@ window.onload = function() {
     //land.update();
     land.draw('land');
     landAnchor.update();
+    land.update();
+    land.draw('land');
+    // Make the babby spin
+    landAnchor.angle = -100;
+    // game.add.tween(landAnchor).to(
+    //   /*properties*/{angle: 360}, 
+    //   /*duration*/2400, 
+    //   Phaser.Easing.Linear.None , 
+    //   /*autostart*/true, 
+    //   /*delay*/ 0, 
+    //   /*repeat*/-1);
 
     // Canvas bitmap
     bmd = game.add.bitmapData(game.width, game.height);
@@ -153,16 +165,12 @@ window.onload = function() {
         level_clicked();
     }
     sprite.update();
-    game.debug.text("FPS: "+game.time.fps, 0, 700);
+    game.debug.text("FPS: "+game.time.fps, 0, 300);
 
-    game.debug.text("Pointer: "+pointer.x+', '+pointer.y, 0 ,600);
 
     var a = getImageOffset();
     var x = a[0];
     var y = a[1];
-
-    game.debug.text("Pointer Offset: "+x+', '+y, 0 ,620);
-
 
     if (cursors.left.isDown)
     {
@@ -182,7 +190,9 @@ window.onload = function() {
         sprite.body.moveDown(200);
     }
 
-
+    game.debug.text("Pointer: "+parseInt(pointer.x)+', '+parseInt(pointer.y), 0 ,320);
+    game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
+    game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
   }
 
   function render () {
