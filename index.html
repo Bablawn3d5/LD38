@@ -11,15 +11,17 @@
 
 window.onload = function() {
 
-  var game = new Phaser.Game(800, 600, Phaser.AUTO, '',
-    { init: init, preload: preload, create: create, update: update, render:render });
+  var game = new Phaser.Game(800, 600, Phaser.AUTO, 'LD38: A Small World',
+    { init: init, preload: preload, create: create, update: update, render:render }, false, false);
 
   var land;   // Logo
   var sprite; // Sprite
   var bmd;    // Canvas bitmap
+  var mask;   // Canvas mask
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
+    Phaser.Canvas.setImageRenderingCrisp(game.canvas);
     //game.world.setBounds(0, 0, 992, 480);
   }
 
@@ -37,14 +39,13 @@ window.onload = function() {
     var pointer = game.input.activePointer;
     var x = Math.floor(pointer.x);
     var y = Math.floor(pointer.y);
-    var rgba = getSpritePixel(land);
-    // Check if there's color.
-    if (rgba.a > 0)
-    {
-        land.blendDestinationOut();
-        land.circle(x, y, 16, game.stage.backgroundColor);
-        land.blendReset();
-    }
+
+    mask.circle(x,y, 16, 'rgba(1,1,1,255)');
+    mask.update();
+
+    land.alphaMask(mask, 'land');
+    land.update();
+    land.replaceRGB(1,1,1,255,0,0,0,0);
   }
 
 
@@ -53,6 +54,7 @@ window.onload = function() {
     game.load.crossOrigin = "Anonymous"
     game.load.image('logo', 'assets/phaser.png');
     game.load.image('sprite', 'assets/Sprite-0001.png');
+    game.load.image('land', 'assets/Sprite-0003.png');
   }
 
   function create () {
@@ -61,18 +63,21 @@ window.onload = function() {
     game.time.desiredFps = 60;
 
     // Land
-    land = game.add.bitmapData(980, 320);
-    land.draw('logo');
+    land = game.add.bitmapData(400, 400);
     land.addToWorld();
-    land.update()
+    land.draw('land');
 
     // Canvas bitmap
-    bmd = game.add.bitmapData(800, 600);
+    bmd = game.add.bitmapData(game.width, game.height);
     bmd.addToWorld();
+
+    // mask bitmap
+    mask = game.add.bitmapData(game.width, game.height);
 
     // Sprite
     sprite = game.add.sprite(game.world.centerX, game.world.centerY, 'sprite');
     sprite.scale.setTo(0.5,0.5);
+    sprite.anchor.setTo(0.5, 0.5);
 
     // World Physics
     game.physics.startSystem(Phaser.Physics.P2JS);
@@ -93,8 +98,11 @@ window.onload = function() {
 
   function update () {
     var pointer = game.input.activePointer;
-    var rgba = getSpritePixel(land);
-    game.debug.text(rgba.a, 0,20);
+    var rgba = getSpritePixel(mask);
+    game.debug.text(rgba.r, 0,20);
+    game.debug.text(rgba.g, 0,40);
+    game.debug.text(rgba.b, 0,60);
+    game.debug.text(rgba.a, 0,80);
     if (pointer.isDown)
     {
         level_clicked();
@@ -104,8 +112,8 @@ window.onload = function() {
   }
 
   function render () {
-    land.draw()
-    bmd.draw()
+    bmd.draw();
+    land.draw();
   }
 
 };
