@@ -66,6 +66,8 @@ window.onload = function() {
     land.update();
     land.replaceRGB(0,0,0,255,0,0,0,0);
     land.update();
+
+    landAnchor.update();
   }
 
 
@@ -84,9 +86,12 @@ window.onload = function() {
 
     // Land
     land = game.add.bitmapData(400, 400);
-    landAnchor = land.addToWorld(game.world.centerX, game.world.centerY,0.5,0.5,1,1);
-    land.update();
-    land.draw('land');
+    landAnchor = game.add.sprite(game.world.centerX, game.world.centerY, 'land');
+    landAnchor.anchor.setTo(0.5, 0.5);
+    //landAnchor = land.addToWorld(game.world.centerX, game.world.centerY,0.5,0.5,1,1);
+    //land.update();
+    //land.draw('land');
+    landAnchor.update();
 
     // Canvas bitmap
     bmd = game.add.bitmapData(game.width, game.height);
@@ -96,7 +101,7 @@ window.onload = function() {
     mask = game.add.bitmapData(game.width, game.height);
 
     // Sprite
-    sprite = game.add.sprite(game.world.centerX, game.world.centerY, 'sprite');
+    sprite = game.add.sprite(game.world.centerX, 0, 'sprite');
     sprite.scale.setTo(0.5,0.5);
     sprite.anchor.setTo(0.5, 0.5);
 
@@ -109,8 +114,26 @@ window.onload = function() {
     game.physics.p2.enable(sprite);
     sprite.body.fixedRotation = true;
 
+    game.physics.p2.setWorldMaterial(worldMaterial, true, true, true, true);
+    var spriteMaterial = game.physics.p2.createMaterial('spriteMaterial', sprite.body);
+    var worldMaterial = game.physics.p2.createMaterial('worldMaterial');
+    var contactMaterial = game.physics.p2.createContactMaterial(spriteMaterial, worldMaterial);
+    contactMaterial.friction = 0.3;     // Friction to use in the contact of these two materials.
+    contactMaterial.restitution = 1.0;  // Restitution (i.e. how bouncy it is!) to use in the contact of these two materials.
+    contactMaterial.stiffness = 1e7;    // Stiffness of the resulting ContactEquation that this ContactMaterial generate.
+    contactMaterial.relaxation = 3;     // Relaxation of the resulting ContactEquation that this ContactMaterial generate.
+    contactMaterial.frictionStiffness = 1e7;    // Stiffness of the resulting FrictionEquation that this ContactMaterial generate.
+    contactMaterial.frictionRelaxation = 3;     // Relaxation of the resulting FrictionEquation that this ContactMaterial generate.
+    contactMaterial.surfaceVelocity = 0;        // Will add surface velocity to this material. If bodyA rests on top if bodyB,
+
+    cursors = game.input.keyboard.createCursorKeys();
+
+
     // Sprite trail
     game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
+
+    // Logging
+    console.log(game);
   }
 
   function trail () {
@@ -138,11 +161,32 @@ window.onload = function() {
     var y = a[1];
 
     game.debug.text("Pointer Offset: "+x+', '+y, 0 ,620);
+
+
+    if (cursors.left.isDown)
+    {
+        sprite.body.moveLeft(200);
+    }
+    else if (cursors.right.isDown)
+    {
+        sprite.body.moveRight(200);
+    }
+
+    if (cursors.up.isDown)
+    {
+        sprite.body.moveUp(200);
+    }
+    else if (cursors.down.isDown)
+    {
+        sprite.body.moveDown(200);
+    }
+
+
   }
 
   function render () {
     bmd.draw();
-    land.draw();
+    //land.draw();
   }
 
 };
