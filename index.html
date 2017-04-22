@@ -22,6 +22,8 @@ window.onload = function() {
   var bmd;        // Canvas bitmap
   var mask;       // Canvas mask
   var landAnchor; // hack
+  //debugging
+  var is_colliding = false;
 
   //config
   var  physDebug = true;
@@ -46,11 +48,17 @@ window.onload = function() {
     return rgba;
   }
 
-  // Translates world X,Y local to landAnchor into bitmap x, y position.
+  // Translates world pointer X,Y local to landAnchor into bitmap x, y position.
   function getImageOffset(){
-    var pointer = game.input.activePointer;
     // Pointer Positiion
-    var p= new Phaser.Point(pointer.x, pointer.y);
+    var pointer = game.input.activePointer;
+    return getOffsetToLandAnchor(pointer);
+  }
+
+    // Translates sprite X,Y pos to landAnchor into bitmap x, y position.
+  function getOffsetToLandAnchor(sprite){
+    // Pointer Positiion
+    var p= new Phaser.Point(sprite.x, sprite.y);
     // Rotate to match planet rotation.
     p.rotate(landAnchor.x,landAnchor.y, -landAnchor.rotation);
     // Translate to bitmap offset.
@@ -60,8 +68,8 @@ window.onload = function() {
   }
 
   // Function draws circle onclick if there is color
-  function level_clicked() {
-    var a = getImageOffset();
+  function level_clicked(sprite) {
+    var a = getOffsetToLandAnchor(sprite)
     var x = a[0];
     var y = a[1];
 
@@ -85,6 +93,21 @@ window.onload = function() {
 
   function hitPlanet (body1, body2) {
     body2.sprite.alpha -= 0.1;
+    is_colliding = true;
+  }
+
+  function checkSensors(bodyA,shapeA,shapeB,contactEquation){
+    if(bodyA && bodyA.sprite) {
+      is_colliding = true
+      bodyA.nuke = true
+    }
+  }
+
+  function checkSensorLeave(bodyA,shapeA,shapeB,contactEquation){
+    if(bodyA && bodyA.sprite) {
+      is_colliding = false
+      bodyA.nuke = false
+    }
   }
 
   function create () {
@@ -99,7 +122,6 @@ window.onload = function() {
     land.draw('land');
     landAnchor.update();
     land.update();
-    land.draw('land');
     // Make the babby spin
     game.add.tween(landAnchor).to(
       /*properties*/{angle: 360},
@@ -120,6 +142,7 @@ window.onload = function() {
     sprite = game.add.sprite(game.world.centerX, 0, 'sprite');
     sprite.scale.setTo(0.5,0.5);
     sprite.anchor.setTo(0.5, 0.5);
+    sprite.name = "Bullet";
 
 
     // === Physics Start ===
@@ -137,17 +160,25 @@ window.onload = function() {
     //missiles.physicsBodyType = Phaser.Physics.P2JS;
     //for i in missiles, set collision group
 
-    game.physics.p2.enable(sprite, physDebug);
     game.physics.p2.enable(landAnchor, physDebug);
 
+    game.physics.p2.enable(sprite, physDebug);
     sprite.body.fixedRotation = true;
     sprite.body.setCircle(16);
     sprite.body.setCollisionGroup(missileCollisionGroup);
     sprite.body.collides(planetCollisionGroup, hitPlanet, this);
 
-    landAnchor.body.setCircle(180);
+    circle = landAnchor.body.setCircle(180);
     landAnchor.body.setCollisionGroup(planetCollisionGroup);
     landAnchor.body.collides(missileCollisionGroup, hitPlanet, this);
+
+    // The planet isn't really 'physically' collidable, set sensor to on.
+    circle.sensor = true;
+    landAnchor.body.motionState = Phaser.Physics.P2.Body.STATIC
+    landAnchor.body.onBeginContact.add(checkSensors,this);
+    landAnchor.body.onEndContact.add(checkSensorLeave,this);
+
+
     // === Physics End ====
 
     cursors = game.input.keyboard.createCursorKeys();
@@ -173,9 +204,12 @@ window.onload = function() {
     game.debug.text("A: "+rgba.a, 0,80);
     if (pointer.isDown)
     {
-        level_clicked();
+        level_clicked(pointer);
     }
     sprite.update();
+    if(sprite.body.nuke == true) {
+      level_clicked(sprite);
+    }
     game.debug.text("FPS: "+game.time.fps, 0, 300);
 
 
@@ -204,6 +238,7 @@ window.onload = function() {
     game.debug.text("Pointer: "+parseInt(pointer.x)+', '+parseInt(pointer.y), 0 ,320);
     game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
     game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
+    game.debug.text("Colliding?: "+ is_colliding, 0, 380);
   }
 
   function render () {
