@@ -46,15 +46,17 @@ window.onload = function() {
     return rgba;
   }
 
-
+  // Translates world X,Y local to landAnchor into bitmap x, y position.
   function getImageOffset(){
-
     var pointer = game.input.activePointer;
-    var x = Math.floor(pointer.x) - landAnchor.centerX + 180;
-    var y = Math.floor(pointer.y) - landAnchor.centerY + 180;
-
-
-    return[x,y];
+    // Pointer Positiion
+    var p= new Phaser.Point(pointer.x, pointer.y);
+    // Rotate to match planet rotation.
+    p.rotate(landAnchor.x,landAnchor.y, -landAnchor.rotation);
+    // Translate to bitmap offset.
+    p.x -= landAnchor.centerX - 180;
+    p.y -= landAnchor.centerY - 180;
+    return[p.x,p.y];
   }
 
   // Function draws circle onclick if there is color
@@ -99,13 +101,13 @@ window.onload = function() {
     land.update();
     land.draw('land');
     // Make the babby spin
-    // game.add.tween(landAnchor).to(
-    //   /*properties*/{angle: 360},
-    //   /*duration*/2400,
-    //   Phaser.Easing.Linear.None ,
-    //   /*autostart*/true,
-    //   /*delay*/ 0,
-    //   /*repeat*/-1);
+    game.add.tween(landAnchor).to(
+      /*properties*/{angle: 360},
+      /*duration*/1240,
+      Phaser.Easing.Linear.None ,
+      /*autostart*/true,
+      /*delay*/ 0,
+      /*repeat*/-1);
 
     // Canvas bitmap
     bmd = game.add.bitmapData(game.width, game.height);
