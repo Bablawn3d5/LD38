@@ -23,6 +23,9 @@ window.onload = function() {
   var mask;   // Canvas mask
   var landAnchor; // hack
 
+  //config
+  var  physDebug = true;
+
   function init() {
     game.renderer.renderSession.roundPixels = true;
     game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -86,7 +89,7 @@ window.onload = function() {
     game.time.desiredFps = 60;
 
     // Land
-    land = game.add.bitmapData(400, 400);
+    land = game.add.bitmapData(360, 366);
     landAnchor = game.add.sprite(game.world.centerX, game.world.centerY, land);
     landAnchor.anchor.setTo(0.5, 0.5);
     //landAnchor = land.addToWorld(game.world.centerX, game.world.centerY,0.5,0.5,1,1);
@@ -98,11 +101,11 @@ window.onload = function() {
     // Make the babby spin
     landAnchor.angle = -100;
     // game.add.tween(landAnchor).to(
-    //   /*properties*/{angle: 360}, 
-    //   /*duration*/2400, 
-    //   Phaser.Easing.Linear.None , 
-    //   /*autostart*/true, 
-    //   /*delay*/ 0, 
+    //   /*properties*/{angle: 360},
+    //   /*duration*/2400,
+    //   Phaser.Easing.Linear.None ,
+    //   /*autostart*/true,
+    //   /*delay*/ 0,
     //   /*repeat*/-1);
 
     // Canvas bitmap
@@ -116,16 +119,18 @@ window.onload = function() {
     sprite = game.add.sprite(game.world.centerX, 0, 'sprite');
     sprite.scale.setTo(0.5,0.5);
     sprite.anchor.setTo(0.5, 0.5);
-
     // World Physics
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.gravity.y = 100;
     game.physics.p2.restitution = 0.8;
 
     // Sprite
-    game.physics.p2.enable(sprite);
-    game.physics.p2.enable(landAnchor);
+    game.physics.p2.enable(sprite, physDebug);
+    game.physics.p2.enable(landAnchor, physDebug);
     sprite.body.fixedRotation = true;
+    sprite.body.setCircle(16);
+    landAnchor.body.setCircle(180);
+
 
     //var spriteMaterial = game.physics.p2.createMaterial('spriteMaterial', sprite.body);
     //var worldMaterial = game.physics.p2.createMaterial('worldMaterial');
