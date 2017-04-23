@@ -152,7 +152,7 @@ window.onload = function() {
 
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
-    m.body.fixedRotation = false;
+    m.body.fixedRotation = true;
     m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
@@ -173,7 +173,7 @@ window.onload = function() {
   function accelerateToPlanet (obj, speed) {
     if (typeof speed === 'undefined') { speed = 100; }
       var angle = Math.atan2(landAnchor.y - obj.y, landAnchor.x - obj.x);
-      obj.body.rotation = angle + game.math.degToRad(0);  // correct angle
+      obj.rotation = angle + game.math.degToRad(0);  // correct angle
       obj.body.force.x = Math.cos(angle) * speed;          // accelerateToObject
       obj.body.force.y = Math.sin(angle) * speed;
   }
@@ -294,6 +294,9 @@ window.onload = function() {
 
  //   game.physics.p2.enable(missiles, physDebug);
 
+    if(sprite ==null || sprite.body == null){
+      sprite = missiles.children[0];
+    }
 
     if (cursors.left.isDown)
     {
@@ -313,6 +316,7 @@ window.onload = function() {
         sprite.body.moveDown(200);
     }
 
+
     if (textDebug) {
       var a = getImageOffset();
       var x = a[0];
@@ -326,6 +330,8 @@ window.onload = function() {
       game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
       game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
+      game.debug.text("Veloicity: "+ parseInt(sprite.body.velocity.x)+ "," +parseInt(sprite.body.velocity.y) , 0, 400);
+      game.debug.text("Angle: "+ sprite.angle, 0, 420);
     }
 
   }
