@@ -265,11 +265,15 @@ window.onload = function() {
     var current = new Date().getTime() / 1000;
     //console.log("Current: "+current);
     //console.log("Creation: "+sprite.creation);
+    game.add.tween(sprite).to(
+      /*properties*/{alpha: 0},
+      /*duration*/100,
+      Phaser.Easing.Linear.None ,
+      /*autostart*/true,
+      /*delay*/ 0,
+      /*repeat*/-1);
     if ( current - sprite.creation > 2 ){
       sprite.destroy();
-    } else {
-      console.log(current - sprite.creation);
-      sprite.alpha = 1 - ( current - sprite.creation);
     }
   }
 
