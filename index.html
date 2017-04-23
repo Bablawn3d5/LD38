@@ -31,6 +31,7 @@ window.onload = function() {
   //config
   var physDebug = false;
   var textDebug = false;
+  var backgroundSpeed = 120000; //higher is slower.
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
@@ -126,6 +127,7 @@ window.onload = function() {
     game.load.crossOrigin = "Anonymous"
     game.load.image('sprite', 'assets/Sprite-0001.png');
     game.load.image('land', 'assets/planet.png');
+    game.load.image('bg', 'assets/LoneGalaxy.png');
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
   }
@@ -189,6 +191,26 @@ window.onload = function() {
     game.stage.backgroundColor = '#124184';
     game.time.advancedTiming = true;
     game.time.desiredFps = 60;
+
+    var background = game.add.sprite(0, 0, 'bg');
+    background.scale.setTo(2,2);
+    game.add.tween(background.position).to(
+      /*properties*/{x: -1400},
+      /*duration*/backgroundSpeed,
+      Phaser.Easing.Linear.None ,
+      /*autostart*/true,
+      /*delay*/ 0,
+      /*repeat*/-1);
+
+    var background2 = game.add.sprite(1400, 0, 'bg');
+    background2.scale.setTo(2,2);
+    game.add.tween(background2.position).to(
+      /*properties*/{x: 0},
+      /*duration*/backgroundSpeed,
+      Phaser.Easing.Linear.None ,
+      /*autostart*/true,
+      /*delay*/ 0,
+      /*repeat*/-1);
 
     // Land
     land = game.add.bitmapData(360, 366);
