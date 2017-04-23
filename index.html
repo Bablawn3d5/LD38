@@ -153,7 +153,7 @@ window.onload = function() {
     }
   }
 
-  function createMissile (x,y,angle) {
+  function createMissile (x,y,power, angle) {
 
     var m = missiles.create(x, y, 'missle', 1);
     m.name = 'missile';
@@ -168,13 +168,17 @@ window.onload = function() {
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
     m.body.fixedRotation = true;
+    m.angle = angle;
+    m.body.angle = angle;
     m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
     m.body.collides([missileCollisionGroup, planetCollisionGroup]);
     game.physics.p2.updateBoundsCollisionGroup();
 
-    m.body.moveUp(angle);
+    console.log(power);
+    //m.body.thrust(power * 10000);
+    m.body.moveForward(power * 10);
 
     // ==== Animations ===
     m.animations.add('spawn', [0,1,2], 60, false);
@@ -189,7 +193,7 @@ window.onload = function() {
     return m;
   }
 
- function updateMissilePower (player){
+ function updateMissilePower (player ){
   if ( player.fire_lock ) {
       if (player.missile_power < 100){
         player.missile_power += 40 * game.time.elapsed / 1000;
@@ -207,7 +211,6 @@ window.onload = function() {
     player.name = 'player-0'+(number);
     player.anchor.setTo(0.5, 0.5);
     player.creation = new Date().getTime() / 1000;
-    player.missile_direction = 0;
     player.missile_power = 0;
     player.fire_lock = false;
 
@@ -250,7 +253,8 @@ window.onload = function() {
   }
 
   function fireMissile ( player ) {
-    sprite = createMissile(player.centerX, player.centerY, player.missile_direction);
+    sprite = createMissile(player.centerX, player.centerY, player.missile_power, player.angle);
+    player.missile_power = 0;
     game.world.bringToTop(player);
 
   }
@@ -342,11 +346,11 @@ window.onload = function() {
 
     player1_fire = game.input.keyboard.addKey(Phaser.Keyboard.F);
     player1_fire.onDown.add(function (){ player1.fire_lock = true; }, game);
-    player1_fire.onUp.add(function (){ player1.fire_lock = false; player1.missile_power = 0; fireMissile(player1) }, game); //IDK
+    player1_fire.onUp.add(function (){ player1.fire_lock = false;  fireMissile(player1) }, game); //IDK
 
     player2_fire = game.input.keyboard.addKey(Phaser.Keyboard.H);
     player2_fire.onDown.add(function (){ player2.fire_lock = true; }, game);
-    player2_fire.onUp.add(function (){ player2.fire_lock = false; player2.missile_power = 0; fireMissile(player2) }, game); //IDK
+    player2_fire.onUp.add(function (){ player2.fire_lock = false; fireMissile(player2) }, game); //IDK
 
     one = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
     one.onDown.add(toggleTextDebug, game);
@@ -458,6 +462,9 @@ window.onload = function() {
 
       game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
       game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
+
+      player1.angle += 1
+      player2.angle += 1
   }
 
   function render () {
