@@ -6,7 +6,7 @@ x	Bullet
 	Background
   Explosions
 
- Consumeables
+  Consumeables
 
 
 Game Logic:
@@ -15,7 +15,8 @@ Game Logic:
 
   Particle Effects
 	Moveable?
-  Laser Mining
+  Laser Mining?
+  Player Shield Effect?
   Orbitals
 
 
