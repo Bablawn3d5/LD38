@@ -167,6 +167,8 @@ window.onload = function() {
     m.animations.add('drift', [23], 0, true);
     m.animations.play('fly');
 
+    game.world.bringToTop(missiles);
+
     return m;
   }
 
@@ -250,7 +252,7 @@ window.onload = function() {
     two.onDown.add(togglePhysDebug, game);
 
     // Sprite trail
-    game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
+    //game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
 
     // Logging
     console.log(game);
@@ -262,6 +264,9 @@ window.onload = function() {
     //console.log("Creation: "+sprite.creation);
     if ( current - sprite.creation > 2 ){
       sprite.destroy();
+    } else {
+      console.log(current - sprite.creation);
+      sprite.alpha = 1 - ( current - sprite.creation);
     }
   }
 
@@ -286,6 +291,7 @@ window.onload = function() {
         level_clicked(pointer);
     }
 
+    missiles.forEach(createTrails, game);
     missiles.forEach(nuke_check, game);
     missiles.forEach(accelerateToPlanet, game );
     // Doesnt work?
