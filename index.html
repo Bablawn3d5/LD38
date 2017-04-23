@@ -22,8 +22,8 @@ window.onload = function() {
   var bmd;        // Canvas bitmap
   var mask;       // Canvas mask
   var landAnchor; // hack
-  //debugging
-  var is_colliding = false;
+  var is_colliding = false; //debugging
+  var missiles; // bullets
 
   //config
   var  physDebug = true;
@@ -69,6 +69,11 @@ window.onload = function() {
 
   // Function draws circle onclick if there is color
   function level_clicked(sprite) {
+
+    if(sprite.body.nuke == false) {
+      return
+    }
+
     var a = getOffsetToLandAnchor(sprite)
     var x = a[0];
     var y = a[1];
@@ -110,6 +115,31 @@ window.onload = function() {
     }
   }
 
+  function createMissile () {
+
+    var m = missiles.create(game.world.centerX, 0, 'sprite');
+    m.scale.setTo(0.5,0.5);
+    m.anchor.setTo(0.5, 0.5);
+
+    game.physics.p2.enable(m, physDebug);
+
+    m.body.fixedRotation = true;
+    m.body.setCircle(16);
+    m.body.setCollisionGroup(missileCollisionGroup);
+    m.body.collides(planetCollisionGroup, hitPlanet, this);
+    m.body.collideWorldBounds = false;
+
+    game.physics.p2.updateBoundsCollisionGroup();
+  }
+
+  function accelerateToPlanet (obj, speed) {
+    if (typeof speed === 'undefined') { speed = 100; }
+      var angle = Math.atan2(landAnchor.y - obj.y, landAnchor.x - obj.x);
+      obj.body.rotation = angle + game.math.degToRad(90);  // correct angle
+      obj.body.force.x = Math.cos(angle) * speed;          // accelerateToObject
+      obj.body.force.y = Math.sin(angle) * speed;
+  }
+
   function create () {
     game.stage.backgroundColor = '#124184';
     game.time.advancedTiming = true;
@@ -138,12 +168,15 @@ window.onload = function() {
     // mask bitmap
     mask = game.add.bitmapData(game.width, game.height);
 
+    // Missiles group
+    missiles = game.add.group();
+
     // Sprite
-    sprite = game.add.sprite(game.world.centerX, 0, 'sprite');
+    sprite = missiles.create(game.world.centerX, 0, 'sprite');
+    sprite.name = 'missile';
     sprite.scale.setTo(0.5,0.5);
     sprite.anchor.setTo(0.5, 0.5);
     sprite.name = "Bullet";
-
 
     // === Physics Start ===
     game.physics.startSystem(Phaser.Physics.P2JS);
@@ -167,6 +200,7 @@ window.onload = function() {
     sprite.body.setCircle(16);
     sprite.body.setCollisionGroup(missileCollisionGroup);
     sprite.body.collides(planetCollisionGroup, hitPlanet, this);
+    sprite.body.collideWorldBounds = false;
 
     circle = landAnchor.body.setCircle(180);
     landAnchor.body.setCollisionGroup(planetCollisionGroup);
@@ -178,11 +212,10 @@ window.onload = function() {
     landAnchor.body.onBeginContact.add(checkSensors,this);
     landAnchor.body.onEndContact.add(checkSensorLeave,this);
 
-
     // === Physics End ====
-
     cursors = game.input.keyboard.createCursorKeys();
-
+    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    spacebar.onDown.add(createMissile, game);
 
     // Sprite trail
     game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
@@ -207,9 +240,8 @@ window.onload = function() {
         level_clicked(pointer);
     }
     sprite.update();
-    if(sprite.body.nuke == true) {
-      level_clicked(sprite);
-    }
+
+    missiles.forEach(level_clicked, game);
     game.debug.text("FPS: "+game.time.fps, 0, 300);
 
 
@@ -239,6 +271,8 @@ window.onload = function() {
     game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
     game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
     game.debug.text("Colliding?: "+ is_colliding, 0, 380);
+
+    missiles.forEach( accelerateToPlanet, game );
   }
 
   function render () {
