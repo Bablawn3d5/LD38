@@ -28,7 +28,8 @@ window.onload = function() {
   var planetCollisionGroup;
 
   //config
-  var  physDebug = false;
+  var physDebug = false;
+  var textDebug = false;
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
@@ -242,22 +243,13 @@ window.onload = function() {
   function update () {
     var pointer = game.input.activePointer;
     var rgba = getSpritePixel(land);
-    game.debug.text("R: "+rgba.r, 0,20);
-    game.debug.text("G: "+rgba.g, 0,40);
-    game.debug.text("B: "+rgba.b, 0,60);
-    game.debug.text("A: "+rgba.a, 0,80);
     if (pointer.isDown)
     {
         level_clicked(pointer);
     }
 
     missiles.forEach(nuke_check, game);
-    game.debug.text("FPS: "+game.time.fps, 0, 300);
-
-
-    var a = getImageOffset();
-    var x = a[0];
-    var y = a[1];
+    missiles.forEach( accelerateToPlanet, game );
 
     if (cursors.left.isDown)
     {
@@ -277,12 +269,21 @@ window.onload = function() {
         sprite.body.moveDown(200);
     }
 
-    game.debug.text("Pointer: "+parseInt(pointer.x)+', '+parseInt(pointer.y), 0 ,320);
-    game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
-    game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
-    game.debug.text("Colliding?: "+ is_colliding, 0, 380);
+    if (textDebug) {
+      var a = getImageOffset();
+      var x = a[0];
+      var y = a[1];
+      game.debug.text("R: "+rgba.r, 0,20);
+      game.debug.text("G: "+rgba.g, 0,40);
+      game.debug.text("B: "+rgba.b, 0,60);
+      game.debug.text("A: "+rgba.a, 0,80);
+      game.debug.text("FPS: "+game.time.fps, 0, 300);
+      game.debug.text("Pointer: "+parseInt(pointer.x)+', '+parseInt(pointer.y), 0 ,320);
+      game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
+      game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
+      game.debug.text("Colliding?: "+ is_colliding, 0, 380);
+    }
 
-    missiles.forEach( accelerateToPlanet, game );
   }
 
   function render () {
