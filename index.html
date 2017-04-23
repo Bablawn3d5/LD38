@@ -24,9 +24,11 @@ window.onload = function() {
   var landAnchor; // hack
   var is_colliding = false; //debugging
   var missiles; // bullets
+  var missileCollisionGroup;
+  var planetCollisionGroup;
 
   //config
-  var  physDebug = true;
+  var  physDebug = false;
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
@@ -112,11 +114,7 @@ window.onload = function() {
     game.load.crossOrigin = "Anonymous"
     game.load.image('sprite', 'assets/Sprite-0001.png');
     game.load.image('land', 'assets/planet.png');
-  }
-
-  function hitPlanet (body1, body2) {
-    body2.sprite.alpha -= 0.1;
-    is_colliding = true;
+    game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
   }
 
   function checkSensors(bodyA,shapeA,shapeB,contactEquation){
@@ -135,19 +133,28 @@ window.onload = function() {
 
   function createMissile () {
 
-    var m = missiles.create(game.world.centerX, 0, 'sprite');
+    var m = missiles.create(game.world.centerX, 0, 'missle', 1);
+    m.name = 'missile';
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
 
+    // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
-
     m.body.fixedRotation = true;
-    m.body.setCircle(16);
+    m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
-    m.body.collides(planetCollisionGroup, hitPlanet, this);
     m.body.collideWorldBounds = false;
-
     game.physics.p2.updateBoundsCollisionGroup();
+
+
+    // ==== Animations ===
+    m.animations.add('spawn', [0,1,2], 60, false);
+    m.animations.add('fly', [2,3,4,5,6,7,8,9,10,11,12], 60, true);
+    m.animations.add('drift_start', [12,13,14,15,16,17,18,19,20,21,22], 60, false);
+    m.animations.add('drift', [23], 0, true);
+    m.animations.play('fly');
+
+    return m;
   }
 
   function accelerateToPlanet (obj, speed) {
@@ -190,39 +197,18 @@ window.onload = function() {
     missiles = game.add.group();
 
     // Sprite
-    sprite = missiles.create(game.world.centerX, 0, 'sprite');
-    sprite.name = 'missile';
-    sprite.scale.setTo(0.5,0.5);
-    sprite.anchor.setTo(0.5, 0.5);
-    sprite.name = "Bullet";
 
     // === Physics Start ===
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.setImpactEvents(true);
     game.physics.p2.restitution = 0.8;
 
-    var missileCollisionGroup = game.physics.p2.createCollisionGroup();
-    var planetCollisionGroup = game.physics.p2.createCollisionGroup();
-
-    game.physics.p2.updateBoundsCollisionGroup();
-
-    //var missiles = game.add.group();
-    //missiles.enableBody = true;
-    //missiles.physicsBodyType = Phaser.Physics.P2JS;
-    //for i in missiles, set collision group
+    missileCollisionGroup = game.physics.p2.createCollisionGroup();
+    planetCollisionGroup = game.physics.p2.createCollisionGroup();
 
     game.physics.p2.enable(landAnchor, physDebug);
-
-    game.physics.p2.enable(sprite, physDebug);
-    sprite.body.fixedRotation = true;
-    sprite.body.setCircle(16);
-    sprite.body.setCollisionGroup(missileCollisionGroup);
-    sprite.body.collides(planetCollisionGroup, hitPlanet, this);
-    sprite.body.collideWorldBounds = false;
-
     circle = landAnchor.body.setCircle(180);
     landAnchor.body.setCollisionGroup(planetCollisionGroup);
-    landAnchor.body.collides(missileCollisionGroup, hitPlanet, this);
 
     // The planet isn't really 'physically' collidable, set sensor to on.
     circle.sensor = true;
@@ -230,7 +216,14 @@ window.onload = function() {
     landAnchor.body.onBeginContact.add(checkSensors,this);
     landAnchor.body.onEndContact.add(checkSensorLeave,this);
 
+    game.physics.p2.updateBoundsCollisionGroup();
+
     // === Physics End ====
+
+    // Create starting srpite
+    sprite = createMissile();
+
+    // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
     spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     spacebar.onDown.add(createMissile, game);
@@ -257,7 +250,6 @@ window.onload = function() {
     {
         level_clicked(pointer);
     }
-    sprite.update();
 
     missiles.forEach(nuke_check, game);
     game.debug.text("FPS: "+game.time.fps, 0, 300);
