@@ -17,14 +17,14 @@ window.onload = function() {
   var game = new Phaser.Game(1280,720, Phaser.AUTO, 'LD38: A Small World',
     { init: init, preload: preload, create: create, update: update, render:render }, false, false);
 
-  var land;       // Logo
-  var sprite;     // Sprite
-  var bmd;        // Canvas bitmap
-  var mask;       // Canvas mask
-  var landAnchor; // hack
+  var land;                 // Logo
+  var sprite;               // Sprite
+  var bmd;                  // Canvas bitmap
+  var mask;                 // Canvas mask
+  var landAnchor;           // hack
   var is_colliding = false; //debugging
-  var missiles; // bullets
-  var trails; // trails
+  var missiles;             // bullets
+  var trails;               // trails
   var missileCollisionGroup;
   var planetCollisionGroup;
 
