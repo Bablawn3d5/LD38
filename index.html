@@ -43,6 +43,14 @@ window.onload = function() {
     //game.world.setBounds(0, 0, 992, 480);
   }
 
+  function togglePhysDebug() {
+    game.debug.reset();
+    physDebug ^= true;
+  }
+  function toggleTextDebug() {
+    game.debug.reset();
+    textDebug ^= true;
+  }
 
   function getSpritePixel(sprite) {
     var pointer = game.input.activePointer;
@@ -201,8 +209,6 @@ window.onload = function() {
     missiles = game.add.group();
     trails = game.add.group();
 
-    // Sprite
-
     // === Physics Start ===
     game.physics.startSystem(Phaser.Physics.P2JS);
     game.physics.p2.setImpactEvents(true);
@@ -228,11 +234,18 @@ window.onload = function() {
     // Create starting srpite
     sprite = createMissile();
     console.log(sprite);
+    console.log(missiles);
 
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
     spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
     spacebar.onDown.add(createMissile, game);
+
+    one = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
+    one.onDown.add(toggleTextDebug, game);
+
+    two = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
+    two.onDown.add(togglePhysDebug, game);
 
     // Sprite trail
     game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
@@ -272,8 +285,13 @@ window.onload = function() {
     }
 
     missiles.forEach(nuke_check, game);
-    missiles.forEach( accelerateToPlanet, game );
+    missiles.forEach(accelerateToPlanet, game );
+    // Doesnt work?
+    //missiles.setAll('debugBody', physDebug);
     trails.forEach( destroyTrails, game );
+
+ //   game.physics.p2.enable(missiles, physDebug);
+
 
     if (cursors.left.isDown)
     {
