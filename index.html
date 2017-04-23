@@ -298,12 +298,6 @@ window.onload = function() {
   }
 
   function update () {
-    var pointer = game.input.activePointer;
-    var rgba = getSpritePixel(land, pointer);
-    if (pointer.isDown)
-    {
-        level_clicked(pointer);
-    }
 
     missiles.forEach(createTrails, game);
     missiles.forEach(nuke_check, game);
@@ -319,9 +313,17 @@ window.onload = function() {
     }
 
     if (textDebug) {
+      var pointer = game.input.activePointer;
+      if (pointer.isDown)
+      {
+          level_clicked(pointer);
+      }
+
       var a = getImageOffset();
       var x = a[0];
       var y = a[1];
+      var pos = new Phaser.Point(x,y);
+      var rgba = getSpritePixel(land, pos);
       game.debug.text("R: "+rgba.r, 0,20);
       game.debug.text("G: "+rgba.g, 0,40);
       game.debug.text("B: "+rgba.b, 0,60);
