@@ -200,7 +200,7 @@ window.onload = function() {
     // Make the babby spin
     game.add.tween(landAnchor).to(
       /*properties*/{angle: 360},
-      /*duration*/1240,
+      /*duration*/124000,
       Phaser.Easing.Linear.None ,
       /*autostart*/true,
       /*delay*/ 0,
@@ -231,6 +231,7 @@ window.onload = function() {
 
     // The planet isn't really 'physically' collidable, set sensor to on.
     circle.sensor = true;
+    landAnchor.body.fixedRotation = true;
     landAnchor.body.motionState = Phaser.Physics.P2.Body.STATIC
     landAnchor.body.onBeginContact.add(checkSensors,this);
     landAnchor.body.onEndContact.add(checkSensorLeave,this);
