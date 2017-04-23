@@ -160,6 +160,10 @@ window.onload = function() {
     m.anchor.setTo(0.5, 0.5);
     m.creation = new Date().getTime() / 1000;
 
+    // ==== Gamelogic Data ===
+    m.boosting = true;
+    m.highestSpeed = 0;
+
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
     m.body.fixedRotation = true;
@@ -169,7 +173,6 @@ window.onload = function() {
     m.body.collides([missileCollisionGroup, planetCollisionGroup]);
     game.physics.p2.updateBoundsCollisionGroup();
 
-
     m.body.moveUp(angle);
 
     // ==== Animations ===
@@ -177,7 +180,8 @@ window.onload = function() {
     m.animations.add('fly', [2,3,4,5,6,7,8,9,10,11,12], 60, true);
     m.animations.add('drift_start', [12,13,14,15,16,17,18,19,20,21,22], 60, false);
     m.animations.add('drift', [23], 0, true);
-    m.animations.play('fly');
+    m.animations.play('spawn');
+    m.events.onAnimationComplete.add( function(sprite) { sprite.animations.play('fly'); }, this);
 
     game.world.bringToTop(missiles);
 
@@ -215,6 +219,20 @@ window.onload = function() {
       direction.setMagnitude(game.time.physicsElapsed);
       var position = new Phaser.Point(0,0);
       obj.angle = 180 + Phaser.Math.radToDeg(Phaser.Point.angle(position, direction));
+
+      // Update max velocity sqr
+      var mag = new Phaser.Point(obj.body.velocity.x, obj.body.velocity.y);
+      mag = mag.getMagnitudeSq();
+      if(obj.highestSpeed < mag) {
+        obj.highestSpeed = mag;
+      } else {
+        // If we're at the peak ie: decellerating, turn off the booster.
+        if(obj.boosting) {
+          obj.animations.play('drift_start');
+          obj.events.onAnimationComplete.add( function(sprite) { sprite.animations.play('drift'); }, this);
+          obj.boosting = false;
+        }
+      }
   }
 
   function fireMissile ( player ) {
@@ -425,8 +443,10 @@ window.onload = function() {
             sprite.body.moveDown(200);
         }
         game.debug.text("Veloicity: "+ parseInt(sprite.body.velocity.x)+ "," +parseInt(sprite.body.velocity.y) , 0, 400);
-        game.debug.text("Angle: "+ sprite.angle, 0, 420);
-        game.debug.text("Missile Count: "+ missiles.children.length, 0, 440);
+        var mag = new Phaser.Point(sprite.body.velocity.x, sprite.body.velocity.y);
+        game.debug.text("Veloicity M: "+ mag.getMagnitudeSq() , 0, 420);
+        game.debug.text("Angle: "+ sprite.angle, 0, 440);
+        game.debug.text("Missile Count: "+ missiles.children.length, 0, 460);
       }
     }
 
