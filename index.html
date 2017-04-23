@@ -17,20 +17,21 @@ window.onload = function() {
   var game = new Phaser.Game(1280,720, Phaser.AUTO, 'LD38: A Small World',
     { init: init, preload: preload, create: create, update: update, render:render }, false, false);
 
-  var land;                 // Logo
-  var sprite;               // Sprite
-  var bmd;                  // Canvas bitmap
-  var mask;                 // Canvas mask
+  var land;  // Logo
+  var sprite;// Sprite
+  var bmd;   // Canvas bitmap
+  var mask;  // Canvas mask
   var landAnchor;           // hack
   var is_colliding = false; //debugging
   var missiles;             // bullets
-  var trails;               // trails
+  var trails;// trails
   var players;
   var player1;
   var player2;
   var missileCollisionGroup;
   var planetCollisionGroup;
   var playerCollisionGroup;
+  var spacebar;
 
   //config
   var physDebug = false;
@@ -188,6 +189,17 @@ window.onload = function() {
     return m;
   }
 
+ function updateMissilePower (player){
+  if ( player.fire_lock ) {
+      if (player.missile_power < 100){
+        player.missile_power += 40 * game.time.elapsed / 1000;
+      }
+      if (player.missile_power >= 100){
+       player.missile_power = 100;
+      }
+  }
+ }
+
  function createPlayer (x,y,number) {
 
     var player = players.create(x, y, 'player-0'+(number), 1);
@@ -196,6 +208,8 @@ window.onload = function() {
     player.anchor.setTo(0.5, 0.5);
     player.creation = new Date().getTime() / 1000;
     player.missile_direction = 0;
+    player.missile_power = 0;
+    player.fire_lock = false;
 
     // ==== Physics ===
    // game.physics.p2.enable(player, physDebug);
@@ -325,24 +339,14 @@ window.onload = function() {
 
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
-    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.F);
-    spacebar.onDown.add(function (){ fireMissile(player1) }, game); //IDK
 
-    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.H);
-    spacebar.onDown.add(function (){ fireMissile(player2) }, game); //IDK
+    player1_fire = game.input.keyboard.addKey(Phaser.Keyboard.F);
+    player1_fire.onDown.add(function (){ player1.fire_lock = true; }, game);
+    player1_fire.onUp.add(function (){ player1.fire_lock = false; player1.missile_power = 0; fireMissile(player1) }, game); //IDK
 
-    player1_up = game.input.keyboard.addKey(Phaser.Keyboard.X);
-    player1_up.onDown.add(function() { player1.missile_direction += 20; } , game);
-
-    player1_down = game.input.keyboard.addKey(Phaser.Keyboard.Z);
-    player1_down.onDown.add(function() { player1.missile_direction -= 20; } , game);
-
-    player2_up = game.input.keyboard.addKey(Phaser.Keyboard.M);
-    player2_up.onDown.add(function() { player2.missile_direction += 20; } , game);
-
-    player2_down = game.input.keyboard.addKey(Phaser.Keyboard.N);
-    player2_down.onDown.add(function() { player2.missile_direction -= 20; } , game);
-
+    player2_fire = game.input.keyboard.addKey(Phaser.Keyboard.H);
+    player2_fire.onDown.add(function (){ player2.fire_lock = true; }, game);
+    player2_fire.onUp.add(function (){ player2.fire_lock = false; player2.missile_power = 0; fireMissile(player2) }, game); //IDK
 
     one = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
     one.onDown.add(toggleTextDebug, game);
@@ -388,6 +392,8 @@ window.onload = function() {
   }
 
   function update () {
+
+    players.forEach(updateMissilePower);
 
     missiles.forEach(createTrails, game);
     missiles.forEach(nuke_check, game);
@@ -450,11 +456,11 @@ window.onload = function() {
       }
     }
 
+      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
+      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
   }
 
   function render () {
-    bmd.draw();
-    //land.draw();
   }
 
 };
