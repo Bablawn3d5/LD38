@@ -52,10 +52,9 @@ window.onload = function() {
     textDebug ^= true;
   }
 
-  function getSpritePixel(sprite) {
-    var pointer = game.input.activePointer;
-    var x = Math.floor(pointer.x);
-    var y = Math.floor(pointer.y);
+  function getSpritePixel(sprite, pos) {
+    var x = Math.floor(pos.x);
+    var y = Math.floor(pos.y);
     var rgba = sprite.getPixel(x, y);
     return rgba;
   }
@@ -105,17 +104,20 @@ window.onload = function() {
       var a = getOffsetToLandAnchor(sprite)
       var x = a[0];
       var y = a[1];
+      var pos = new Phaser.Point(x,y);
+      var rgba = getSpritePixel(land, pos);
+      if (rgba.a > 0) {
+        mask.circle(x,y,16,'rgba(0,0,0,255)');
+        mask.update();
 
-      mask.circle(x,y,16,'rgba(0,0,0,255)');
-      mask.update();
+        land.alphaMask(mask, 'land');
+        landAnchor.update();
+        land.update();
+        land.replaceRGB(0,0,0,255,0,0,0,0);
+        land.update();
 
-      land.alphaMask(mask, 'land');
-      landAnchor.update();
-      land.update();
-      land.replaceRGB(0,0,0,255,0,0,0,0);
-      land.update();
-
-      sprite.destroy();
+        sprite.destroy();
+      }
     }
   }
 
@@ -292,7 +294,7 @@ window.onload = function() {
 
   function update () {
     var pointer = game.input.activePointer;
-    var rgba = getSpritePixel(land);
+    var rgba = getSpritePixel(land, pointer);
     if (pointer.isDown)
     {
         level_clicked(pointer);
@@ -311,25 +313,6 @@ window.onload = function() {
       sprite = missiles.children[0];
     }
 
-    if (cursors.left.isDown)
-    {
-        sprite.body.moveLeft(200);
-    }
-    else if (cursors.right.isDown)
-    {
-        sprite.body.moveRight(200);
-    }
-
-    if (cursors.up.isDown)
-    {
-        sprite.body.moveUp(200);
-    }
-    else if (cursors.down.isDown)
-    {
-        sprite.body.moveDown(200);
-    }
-
-
     if (textDebug) {
       var a = getImageOffset();
       var x = a[0];
@@ -344,6 +327,24 @@ window.onload = function() {
       game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
       if(sprite && sprite.body) {
+        //misslesteering code.
+        if (cursors.left.isDown)
+        {
+            sprite.body.moveLeft(200);
+        }
+        else if (cursors.right.isDown)
+        {
+            sprite.body.moveRight(200);
+        }
+
+        if (cursors.up.isDown)
+        {
+            sprite.body.moveUp(200);
+        }
+        else if (cursors.down.isDown)
+        {
+            sprite.body.moveDown(200);
+        }
         game.debug.text("Veloicity: "+ parseInt(sprite.body.velocity.x)+ "," +parseInt(sprite.body.velocity.y) , 0, 400);
         game.debug.text("Angle: "+ sprite.angle, 0, 420);
       }
