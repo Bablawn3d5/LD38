@@ -24,6 +24,7 @@ window.onload = function() {
   var landAnchor; // hack
   var is_colliding = false; //debugging
   var missiles; // bullets
+  var trails; // trails
   var missileCollisionGroup;
   var planetCollisionGroup;
 
@@ -116,6 +117,7 @@ window.onload = function() {
     game.load.image('sprite', 'assets/Sprite-0001.png');
     game.load.image('land', 'assets/planet.png');
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
+    game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
   }
 
   function checkSensors(bodyA,shapeA,shapeB,contactEquation){
@@ -138,6 +140,7 @@ window.onload = function() {
     m.name = 'missile';
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
+    m.creation = new Date().getTime() / 1000;
 
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
@@ -196,6 +199,7 @@ window.onload = function() {
 
     // Missiles group
     missiles = game.add.group();
+    trails = game.add.group();
 
     // Sprite
 
@@ -223,6 +227,7 @@ window.onload = function() {
 
     // Create starting srpite
     sprite = createMissile();
+    console.log(sprite);
 
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
@@ -236,8 +241,26 @@ window.onload = function() {
     console.log(game);
   }
 
+  function destroyTrails (sprite) {
+    var current = new Date().getTime() / 1000;
+    //console.log("Current: "+current);
+    //console.log("Creation: "+sprite.creation);
+    if ( current - sprite.creation > 2 ){
+      sprite.destroy();
+    }
+  }
+
+  function createTrails (sprite) {
+
+    var trail = trails.create(sprite.x, sprite.y, 'trail', 1);
+    trail.name = 'trail';
+    trail.creation = new Date().getTime() / 1000;
+
+    return trail;
+  }
+
   function trail () {
-    bmd.circle( sprite.x, sprite.y, 1, '#ffff00');
+    missiles.forEach( createTrails, game);
   }
 
   function update () {
@@ -250,6 +273,7 @@ window.onload = function() {
 
     missiles.forEach(nuke_check, game);
     missiles.forEach( accelerateToPlanet, game );
+    trails.forEach( destroyTrails, game );
 
     if (cursors.left.isDown)
     {
