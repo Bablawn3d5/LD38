@@ -25,8 +25,12 @@ window.onload = function() {
   var is_colliding = false; //debugging
   var missiles;             // bullets
   var trails;               // trails
+  var players;
+  var player1;
+  var player2;
   var missileCollisionGroup;
   var planetCollisionGroup;
+  var playerCollisionGroup;
 
   //config
   var physDebug = false;
@@ -130,6 +134,8 @@ window.onload = function() {
     game.load.image('bg', 'assets/LoneGalaxy.png');
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
+    game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
+    game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
   }
 
   function checkSensors(bodyA,shapeA,shapeB,contactEquation){
@@ -146,9 +152,9 @@ window.onload = function() {
     }
   }
 
-  function createMissile () {
+  function createMissile (x,y,angle) {
 
-    var m = missiles.create(game.world.centerX, 0, 'missle', 1);
+    var m = missiles.create(x, y, 'missle', 1);
     m.name = 'missile';
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
@@ -164,6 +170,8 @@ window.onload = function() {
     game.physics.p2.updateBoundsCollisionGroup();
 
 
+    m.body.moveUp(angle);
+
     // ==== Animations ===
     m.animations.add('spawn', [0,1,2], 60, false);
     m.animations.add('fly', [2,3,4,5,6,7,8,9,10,11,12], 60, true);
@@ -176,8 +184,30 @@ window.onload = function() {
     return m;
   }
 
+ function createPlayer (x,y,number) {
+
+    var player = players.create(x, y, 'player-0'+(number), 1);
+
+    player.name = 'player-0'+(number);
+    player.anchor.setTo(0.5, 0.5);
+    player.creation = new Date().getTime() / 1000;
+    player.missile_direction = 0;
+
+    // ==== Physics ===
+   // game.physics.p2.enable(player, physDebug);
+   // player.body.fixedRotation = true;
+   // player.body.setCircle(5);
+   // player.body.setCollisionGroup(playerCollisionGroup);
+   // player.body.collideWorldBounds = false;
+   // player.body.collides([missileCollisionGroup, playerCollisionGroup]);
+   // game.physics.p2.updateBoundsCollisionGroup();
+
+
+   return player;
+  }
+
   function accelerateToPlanet (obj, speed) {
-    if (typeof speed === 'undefined') { speed = 100; }
+    if (typeof speed === 'undefined') { speed = 300; }
       var angle = Math.atan2(landAnchor.y - obj.y, landAnchor.x - obj.x);
       obj.body.force.x = Math.cos(angle) * speed;          // accelerateToObject
       obj.body.force.y = Math.sin(angle) * speed;
@@ -185,6 +215,12 @@ window.onload = function() {
       direction.setMagnitude(game.time.physicsElapsed);
       var position = new Phaser.Point(0,0);
       obj.angle = 180 + Phaser.Math.radToDeg(Phaser.Point.angle(position, direction));
+  }
+
+  function fireMissile ( player ) {
+    sprite = createMissile(player.centerX, player.centerY, player.missile_direction);
+    game.world.bringToTop(player);
+
   }
 
   function create () {
@@ -238,6 +274,7 @@ window.onload = function() {
     // Missiles group
     trails = game.add.group();
     missiles = game.add.group();
+    players = game.add.group();
 
     // === Physics Start ===
     game.physics.startSystem(Phaser.Physics.P2JS);
@@ -245,6 +282,7 @@ window.onload = function() {
     game.physics.p2.restitution = 0.8;
 
     missileCollisionGroup = game.physics.p2.createCollisionGroup();
+    playerCollisionGroup = game.physics.p2.createCollisionGroup();
     planetCollisionGroup = game.physics.p2.createCollisionGroup();
 
     game.physics.p2.enable(landAnchor, physDebug);
@@ -263,24 +301,36 @@ window.onload = function() {
 
     // === Physics End ====
 
-    // Create starting srpite
-    sprite = createMissile();
-    console.log(sprite);
-    console.log(missiles);
+    // Create Starting players
+    player1 = createPlayer(300,game.world.centerY,1);
+    player2 = createPlayer(game.width - 300, game.world.centerY,2);
 
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
-    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-    spacebar.onDown.add(createMissile, game);
+    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.F);
+    spacebar.onDown.add(function (){ fireMissile(player1) }, game); //IDK
+
+    spacebar = game.input.keyboard.addKey(Phaser.Keyboard.H);
+    spacebar.onDown.add(function (){ fireMissile(player2) }, game); //IDK
+
+    player1_up = game.input.keyboard.addKey(Phaser.Keyboard.X);
+    player1_up.onDown.add(function() { player1.missile_direction += 20; } , game);
+
+    player1_down = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+    player1_down.onDown.add(function() { player1.missile_direction -= 20; } , game);
+
+    player2_up = game.input.keyboard.addKey(Phaser.Keyboard.M);
+    player2_up.onDown.add(function() { player2.missile_direction += 20; } , game);
+
+    player2_down = game.input.keyboard.addKey(Phaser.Keyboard.N);
+    player2_down.onDown.add(function() { player2.missile_direction -= 20; } , game);
+
 
     one = game.input.keyboard.addKey(Phaser.Keyboard.ONE);
     one.onDown.add(toggleTextDebug, game);
 
     two = game.input.keyboard.addKey(Phaser.Keyboard.TWO);
     two.onDown.add(togglePhysDebug, game);
-
-    // Sprite trail
-    //game.time.events.loop(Phaser.Timer.QUARTER, trail, game);
 
     // Logging
     console.log(game);
