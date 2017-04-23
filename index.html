@@ -70,6 +70,24 @@ window.onload = function() {
   // Function draws circle onclick if there is color
   function level_clicked(sprite) {
 
+    var a = getOffsetToLandAnchor(sprite)
+    var x = a[0];
+    var y = a[1];
+
+    mask.circle(x,y,16,'rgba(0,0,0,255)');
+    mask.update();
+
+    land.alphaMask(mask, 'land');
+    landAnchor.update();
+    land.update();
+    land.replaceRGB(0,0,0,255,0,0,0,0);
+    land.update();
+
+  }
+
+  // Function draws circle onclick if there is color
+  function nuke_check(sprite) {
+
     if(sprite.body.nuke == false) {
       return
     }
@@ -241,7 +259,7 @@ window.onload = function() {
     }
     sprite.update();
 
-    missiles.forEach(level_clicked, game);
+    missiles.forEach(nuke_check, game);
     game.debug.text("FPS: "+game.time.fps, 0, 300);
 
 
