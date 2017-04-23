@@ -50921,6 +50921,8 @@ Phaser.BitmapData.prototype = {
             ctx.fillStyle = fillStyle;
         }
 
+        //Parker Hack
+        ctx.imageSmoothingEnabled = false;
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, Math.PI * 2, false);
         ctx.closePath();
