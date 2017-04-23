@@ -175,9 +175,12 @@ window.onload = function() {
   function accelerateToPlanet (obj, speed) {
     if (typeof speed === 'undefined') { speed = 100; }
       var angle = Math.atan2(landAnchor.y - obj.y, landAnchor.x - obj.x);
-      obj.rotation = angle + game.math.degToRad(0);  // correct angle
       obj.body.force.x = Math.cos(angle) * speed;          // accelerateToObject
       obj.body.force.y = Math.sin(angle) * speed;
+      var direction = new Phaser.Point(obj.body.velocity.x, obj.body.velocity.y);
+      direction.setMagnitude(game.time.physicsElapsed);
+      var position = new Phaser.Point(0,0);
+      obj.angle = 180 + Phaser.Math.radToDeg(Phaser.Point.angle(position, direction));
   }
 
   function create () {
@@ -336,8 +339,10 @@ window.onload = function() {
       game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
       game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
-      game.debug.text("Veloicity: "+ parseInt(sprite.body.velocity.x)+ "," +parseInt(sprite.body.velocity.y) , 0, 400);
-      game.debug.text("Angle: "+ sprite.angle, 0, 420);
+      if(sprite && sprite.body) {
+        game.debug.text("Veloicity: "+ parseInt(sprite.body.velocity.x)+ "," +parseInt(sprite.body.velocity.y) , 0, 400);
+        game.debug.text("Angle: "+ sprite.angle, 0, 420);
+      }
     }
 
   }
