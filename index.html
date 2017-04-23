@@ -433,6 +433,8 @@ window.onload = function() {
       game.debug.text("Pointer To Bitmap Off: "+parseInt(x)+', '+parseInt(y), 0 , 340);
       game.debug.text("Angle: "+    landAnchor.angle, 0 , 360);
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
+      game.debug.text("P1 Hold F to fire", player1.x - 16, game.height  - 20);
+      game.debug.text("P2 Hold H to fire", player2.x - 16, game.height  - 20);
       if(sprite && sprite.body) {
         //misslesteering code.
         if (cursors.left.isDown)
@@ -462,6 +464,7 @@ window.onload = function() {
 
       game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
       game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
+
 
       player1.angle += 1
       player2.angle += 1
