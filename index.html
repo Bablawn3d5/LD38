@@ -241,11 +241,12 @@ window.onload = function() {
     player.animations.play('idle')
 
     // ==== Physics ===
-    game.physics.p2.enable(player, physDebug);
+    game.physics.p2.enable(player, true);
     player.body.fixedRotation = true;
 
     // Fix me?
-    // player.body.setCircle(20);
+    // For some reason, changing between these two bodies really affects how fast the missiles go
+    // player.body.setCircle(30);
     player.body.setRectangleFromSprite(player.name);
 
     player.body.setCollisionGroup(playerCollisionGroup);
@@ -253,13 +254,27 @@ window.onload = function() {
     player.body.motionState = Phaser.Physics.P2.Body.STATIC;
     player.body.mass= 0;
     player.body.name = player.name;
-    player.body.collides([missileCollisionGroup], function(game, missile){
-                                               if ( player.lives.length > 0  && player.name != missile.name){
+    player.body.collides([missileCollisionGroup], function(g, missile){
+                                               if ( player.lives.length > 0  && player.name != missile.name ){
                                                 var h = player.lives.pop();
                                                 h.destroy();
                                               } else if ( player.lives.length > 0 ){}
                                               else {
-                                              console.log(player.name+' is dead');
+                                                var winner;
+                                                if ( player.name = 'player-01') {
+                                                  winner = 'player-02';
+                                                } else { winner = 'player-01' }
+                                                  var t = game.add.text(game.world.centerX,
+                                                  game.world.centerY,
+                                                  winner +' wins!');
+                                                  t.anchor.set(0.5);
+                                                  t.align = 'center';
+
+                                                  t.font = 'Arial Black';
+                                                  t.fontSize = 72;
+                                                  t.fontWeight = 'bold';
+                                                  t.fill = '#ffffff';
+                                                  t.setShadow(10, 10, 'rgba(0,0,0,1)', 10);
                                              }
                                     },this
                                   );
