@@ -38,7 +38,7 @@ window.onload = function() {
   var textDebug = false;
   var backgroundSpeed = 120000; //higher is slower.
   var planetSpinSpeed = 124000; //higher is slower
-  var trailDespawnTime = 2000;
+  var trailDespawnTime = 6000;
   var misslePowerGainPerMS = 0.040;
 
   function init() {
@@ -281,7 +281,7 @@ window.onload = function() {
     game.add.tween(background.position).to(
       /*properties*/{x: -1400},
       /*duration*/backgroundSpeed,
-      Phaser.Easing.Linear.None ,
+      Phaser.Easing.Exponential.In ,
       /*autostart*/true,
       /*delay*/ 0,
       /*repeat*/-1);
@@ -291,7 +291,7 @@ window.onload = function() {
     game.add.tween(background2.position).to(
       /*properties*/{x: 0},
       /*duration*/backgroundSpeed,
-      Phaser.Easing.Linear.None ,
+      Phaser.Easing.Exponential.In ,
       /*autostart*/true,
       /*delay*/ 0,
       /*repeat*/-1);
