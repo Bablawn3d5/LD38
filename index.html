@@ -140,6 +140,7 @@ window.onload = function() {
     game.load.spritesheet('player-02', 'assets/ShooterThing.png', 137, 148);
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
+    game.load.spritesheet('heart', 'assets/heart.png', 16, 16);
     game.load.spritesheet('trail-02', 'assets/trail-02.png', 8, 8);
     game.load.spritesheet('powerbar', 'assets/powerbar.png', 100, 20);
     game.load.spritesheet('powerbar-progress', 'assets/powerbar-progress.png', 3, 20);
@@ -223,6 +224,11 @@ window.onload = function() {
     player.name = 'player-0'+(number);
     player.missile_power = 0;
     player.fire_lock = false;
+    player.lives = [];
+
+    for ( var i = 0; i < 6; i++ ){
+       player.lives.push( game.add.sprite(player.x + (i * 17) - 50  , player.centerY + 70, 'heart'));
+    }
 
     // Antimations.
     player.animations.add('idle', [0,1,2,3,4,3,2,1], 20, true);
@@ -289,7 +295,7 @@ window.onload = function() {
 
   function createPowerbar (player){
 
-    powerbar = game.add.sprite(player.x  , player1.centerY + 60, 'powerbar');
+    powerbar = game.add.sprite(player.x  , player.centerY + 60, 'powerbar');
     powerbar.anchor.setTo(0.5,0.5);
     powerbar.scale.setTo(1,1);
     player.powerbar = powerbar;
