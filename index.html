@@ -245,7 +245,15 @@ window.onload = function() {
     player.body.setCollisionGroup(playerCollisionGroup);
     player.body.collideWorldBounds = true;
     player.body.motionState = Phaser.Physics.P2.Body.STATIC;
-    player.body.onBeginContact.add(function(item){console.log("HIT")},this);
+    player.body.onBeginContact.add(function(){
+                                               if ( player.lives.length > 0 ){
+                                                var h = player.lives.pop();
+                                                h.destroy();
+                                              } else {
+                                              console.log(player.name+' is dead');
+                                             }
+                                    },this
+                                  );
     player.body.collides([missileCollisionGroup]);
     game.physics.p2.updateBoundsCollisionGroup();
 
