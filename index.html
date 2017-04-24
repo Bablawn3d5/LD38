@@ -147,6 +147,10 @@ window.onload = function() {
     game.load.spritesheet('player-02', 'assets/ShooterThing.png', 137, 148);
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
+    game.load.spritesheet('heart', 'assets/heart.png', 16, 16);
+    game.load.spritesheet('trail-02', 'assets/trail-02.png', 8, 8);
+    game.load.spritesheet('powerbar', 'assets/powerbar.png', 100, 20);
+    game.load.spritesheet('powerbar-progress', 'assets/powerbar-progress.png', 3, 20);
     //game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
     //game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
   }
@@ -165,30 +169,34 @@ window.onload = function() {
     }
   }
 
-  function createMissile (x,y,power, angle, tint) {
-
-    var m = missiles.create(x, y, 'missle', 1);
-    m.name = 'missile';
+  function createMissile (player) {
+    var m = missiles.create(player.x, player.y, 'missle', 1);
+    m.name = player.name;
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
 
     // ==== Gamelogic Data ===
     m.boosting = true;
     m.highestSpeed = 0;
-    m.playerTint = tint;
+    m.playerTint = player.colorTint;
 
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
     m.body.fixedRotation = true;
-    m.angle = angle;
-    m.body.angle = angle;
+    m.angle = player.angle;
+    m.body.angle = player.angle;
     m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
-    m.body.collides([missileCollisionGroup, planetCollisionGroup]);
+    m.body.collides([missileCollisionGroup, planetCollisionGroup, playerCollisionGroup]);
+    m.body.onEndContact.add(function(game, item){
+                              if (item.parent.name != m.name) {
+                                m.destroy();
+                              }
+                            },this);
+    m.body.name = player.name;
 
-    //m.body.thrust(power * 10000);
-    m.body.moveForward(power * 10);
+    m.body.moveForward(player.missile_power * 10);
 
     // ==== Animations ===
     m.animations.add('spawn', [0,1,2], 60, false);
@@ -223,6 +231,11 @@ window.onload = function() {
     player.name = 'player-0'+(number);
     player.missile_power = 0;
     player.fire_lock = false;
+    player.lives = [];
+
+    for ( var i = 0; i < 6; i++ ){
+       player.lives.push( game.add.sprite(player.x + (i * 16) - 50  , player.centerY + 70, 'heart'));
+    }
 
     // Antimations.
     player.animations.add('idle', [0,1,2,3,4,3,2,1], 20, true);
@@ -237,14 +250,44 @@ window.onload = function() {
     }
 
     // ==== Physics ===
-   // game.physics.p2.enable(player, physDebug);
-   // player.body.fixedRotation = true;
-   // player.body.setCircle(5);
-   // player.body.setCollisionGroup(playerCollisionGroup);
-   // player.body.collideWorldBounds = false;
-   // player.body.collides([missileCollisionGroup, playerCollisionGroup]);
-   // game.physics.p2.updateBoundsCollisionGroup();
+    game.physics.p2.enable(player, physDebug);
+    player.body.fixedRotation = true;
 
+    // Fix me?
+    // For some reason, changing between these two bodies really affects how fast the missiles go
+    player.body.setCircle(20);
+    //player.body.setRectangleFromSprite(player.name);
+
+    player.body.setCollisionGroup(playerCollisionGroup);
+    player.body.collideWorldBounds = true;
+    player.body.motionState = Phaser.Physics.P2.Body.STATIC;
+    player.body.mass= 0;
+    player.body.name = player.name;
+    player.body.collides([missileCollisionGroup], function(g, missile){
+                                               if ( player.lives.length > 0  && player.name != missile.name ){
+                                                var h = player.lives.pop();
+                                                h.destroy();
+                                              } else if ( player.lives.length > 0 ){}
+                                              else {
+                                                var winner;
+                                                if ( player.name = 'player-01') {
+                                                  winner = 'player-02';
+                                                } else { winner = 'player-01' }
+                                                  var t = game.add.text(game.world.centerX,
+                                                  game.world.centerY,
+                                                  winner +' wins!');
+                                                  t.anchor.set(0.5);
+                                                  t.align = 'center';
+
+                                                  t.font = 'Arial Black';
+                                                  t.fontSize = 72;
+                                                  t.fontWeight = 'bold';
+                                                  t.fill = '#ffffff';
+                                                  t.setShadow(10, 10, 'rgba(0,0,0,1)', 10);
+                                             }
+                                    },this
+                                  );
+    game.physics.p2.updateBoundsCollisionGroup();
 
    return player;
   }
@@ -276,14 +319,37 @@ window.onload = function() {
 
   function fireMissile ( player ) {
 
-    var p= new Phaser.Point(player.centerX, player.y - player.height/2);
+    var p = new Phaser.Point(player.centerX, player.y - player.height/2);
     // Rotate to match planet rotation.
     p.rotate(player.centerX, player.y, Phaser.Math.degToRad(player.angle));
 
-    sprite = createMissile(p.x, p.y, player.missile_power, player.angle, player.colorTint);
+    sprite = createMissile(player);
     player.missile_power = 0;
     game.world.bringToTop(player);
 
+  }
+
+  function updatePowerbar( player ) {
+
+    var p = player.missile_power / 3;    // convert to percentage
+    if (p > 32 ) { p = 32 };             // clamp
+
+    player.powerbar_progress.scale.setTo( p, 1);
+    player.powerbar_progress.x = player.powerbar.x - (player.powerbar.width /2) + 2;
+  }
+
+  function createPowerbar (player){
+
+    powerbar = game.add.sprite(player.x  , player.centerY + 60, 'powerbar');
+    powerbar.anchor.setTo(0.5,0.5);
+    powerbar.scale.setTo(1,1);
+    player.powerbar = powerbar;
+
+    powerbar_progress = game.add.sprite(powerbar.x - 30  , powerbar.centerY, 'powerbar-progress');
+    powerbar_progress.anchor.setTo(0,0.5);
+    player.powerbar_progress = powerbar_progress;
+
+    updatePowerbar(player);
   }
 
   function create () {
@@ -368,6 +434,10 @@ window.onload = function() {
     player1 = createPlayer(300,game.world.centerY,1);
     player2 = createPlayer(game.width - 300, game.world.centerY,2);
 
+    // powerbar sprites
+    createPowerbar(player1);
+    createPowerbar(player2);
+
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -404,10 +474,10 @@ window.onload = function() {
     }
   }
 
-  function createTrails (sprite) {
+  function createTrails (sprite ) {
 
-    var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
-    trail.name = 'trail';
+    var trail = trails.create(sprite.centerX, sprite.centerY, sprite.trail, 1);
+    trail.name = sprite.trail;
     trail.despawnTime = trailDespawnTime; //Miliseconds
     trail.scale.setTo(0.75,0.75)
     trail.tint = sprite.playerTint;
@@ -436,6 +506,7 @@ window.onload = function() {
   function update () {
 
     players.forEach(updateMissilePower);
+    players.forEach(updatePowerbar);
 
     missiles.forEach(createTrails, game);
     missiles.forEach(nuke_check, game);
@@ -473,6 +544,8 @@ window.onload = function() {
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
       game.debug.text("P1 Hold F to fire", player1.x - 16, game.height  - 20);
       game.debug.text("P2 Hold H to fire", player2.x - 16, game.height  - 20);
+      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
+      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
       if(sprite && sprite.body) {
         //misslesteering code.
         if (cursors.left.isDown)
@@ -500,12 +573,10 @@ window.onload = function() {
       }
     }
 
-      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
-      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
-
-
-      player1.angle += 1
-      player2.angle += 1
+      player1.angle += 1;
+      player2.angle += 1;
+      player1.body.angle += 1;
+      player2.body.angle += 1;
   }
 
   function render () {
