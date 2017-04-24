@@ -386,6 +386,7 @@ window.onload = function() {
     var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
     trail.name = 'trail';
     trail.despawnTime = trailDespawnTime; //Miliseconds
+    trail.anchor.setTo(0.5,0.5);
     game.add.tween(trail).to(
         /*properties*/{alpha: 0},
         /*duration*/trail.despawnTime,
