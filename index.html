@@ -281,7 +281,7 @@ window.onload = function() {
     game.add.tween(background.position).to(
       /*properties*/{x: -1400},
       /*duration*/backgroundSpeed,
-      Phaser.Easing.Exponential.In ,
+      Phaser.Easing.Linear.None ,
       /*autostart*/true,
       /*delay*/ 0,
       /*repeat*/-1);
@@ -291,7 +291,7 @@ window.onload = function() {
     game.add.tween(background2.position).to(
       /*properties*/{x: 0},
       /*duration*/backgroundSpeed,
-      Phaser.Easing.Exponential.In ,
+      Phaser.Easing.Linear.None ,
       /*autostart*/true,
       /*delay*/ 0,
       /*repeat*/-1);
@@ -386,18 +386,18 @@ window.onload = function() {
     var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
     trail.name = 'trail';
     trail.despawnTime = trailDespawnTime; //Miliseconds
-    trail.anchor.setTo(0.5,0.5);
+    trail.scale.setTo(0.75,0.75)
     game.add.tween(trail).to(
         /*properties*/{alpha: 0},
         /*duration*/trail.despawnTime,
-        Phaser.Easing.Linear.None ,
+        Phaser.Easing.Exponential.In ,
         /*autostart*/true,
         /*delay*/ 0,
         /*repeat*/0);
     game.add.tween(trail.scale).to(
         /*properties*/{x: 0, y: 0},
         /*duration*/trail.despawnTime,
-        Phaser.Easing.Linear.None ,
+        Phaser.Easing.Exponential.In ,
         /*autostart*/true,
         /*delay*/ 0,
         /*repeat*/0);
