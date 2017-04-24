@@ -476,7 +476,7 @@ window.onload = function() {
 
   function createTrails (sprite ) {
 
-    var trail = trails.create(sprite.centerX, sprite.centerY, sprite.trail, 1);
+    var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
     trail.name = sprite.trail;
     trail.despawnTime = trailDespawnTime; //Miliseconds
     trail.scale.setTo(0.75,0.75)
