@@ -165,7 +165,7 @@ window.onload = function() {
   function createMissile (player) {
 
     var m = missiles.create(player.x, player.y, 'missle', 1);
-    m.name = 'missile-'+player.name;
+    m.name = player.name;
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
 
@@ -188,6 +188,12 @@ window.onload = function() {
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
     m.body.collides([missileCollisionGroup, planetCollisionGroup, playerCollisionGroup]);
+    m.body.onEndContact.add(function(game, item){
+                              if (item.parent.name != m.name) {
+                                m.destroy();
+                              }
+                            },this);
+    m.body.name = player.name;
 
     m.body.moveForward(player.missile_power * 10);
 
@@ -235,7 +241,7 @@ window.onload = function() {
     player.animations.play('idle')
 
     // ==== Physics ===
-    game.physics.p2.enable(player, true);
+    game.physics.p2.enable(player, physDebug);
     player.body.fixedRotation = true;
 
     // Fix me?
@@ -245,16 +251,18 @@ window.onload = function() {
     player.body.setCollisionGroup(playerCollisionGroup);
     player.body.collideWorldBounds = true;
     player.body.motionState = Phaser.Physics.P2.Body.STATIC;
-    player.body.onBeginContact.add(function(){
-                                               if ( player.lives.length > 0 ){
+    player.body.mass= 0;
+    player.body.name = player.name;
+    player.body.collides([missileCollisionGroup], function(game, missile){
+                                               if ( player.lives.length > 0  && player.name != missile.name){
                                                 var h = player.lives.pop();
                                                 h.destroy();
-                                              } else {
+                                              } else if ( player.lives.length > 0 ){}
+                                              else {
                                               console.log(player.name+' is dead');
                                              }
                                     },this
                                   );
-    player.body.collides([missileCollisionGroup]);
     game.physics.p2.updateBoundsCollisionGroup();
 
    return player;
