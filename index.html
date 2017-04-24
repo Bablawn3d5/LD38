@@ -241,13 +241,13 @@ window.onload = function() {
     player.animations.play('idle')
 
     // ==== Physics ===
-    game.physics.p2.enable(player, true);
+    game.physics.p2.enable(player, physDebug);
     player.body.fixedRotation = true;
 
     // Fix me?
     // For some reason, changing between these two bodies really affects how fast the missiles go
-    // player.body.setCircle(30);
-    player.body.setRectangleFromSprite(player.name);
+    player.body.setCircle(20);
+    //player.body.setRectangleFromSprite(player.name);
 
     player.body.setCollisionGroup(playerCollisionGroup);
     player.body.collideWorldBounds = true;
