@@ -187,7 +187,7 @@ window.onload = function() {
     m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
-    m.body.collides([missileCollisionGroup, planetCollisionGroup]);
+    m.body.collides([missileCollisionGroup, planetCollisionGroup, playerCollisionGroup]);
 
     m.body.moveForward(player.missile_power * 10);
 
@@ -227,7 +227,7 @@ window.onload = function() {
     player.lives = [];
 
     for ( var i = 0; i < 6; i++ ){
-       player.lives.push( game.add.sprite(player.x + (i * 17) - 50  , player.centerY + 70, 'heart'));
+       player.lives.push( game.add.sprite(player.x + (i * 16) - 50  , player.centerY + 70, 'heart'));
     }
 
     // Antimations.
@@ -235,14 +235,19 @@ window.onload = function() {
     player.animations.play('idle')
 
     // ==== Physics ===
-   // game.physics.p2.enable(player, physDebug);
-   // player.body.fixedRotation = true;
-   // player.body.setCircle(5);
-   // player.body.setCollisionGroup(playerCollisionGroup);
-   // player.body.collideWorldBounds = false;
-   // player.body.collides([missileCollisionGroup, playerCollisionGroup]);
-   // game.physics.p2.updateBoundsCollisionGroup();
+    game.physics.p2.enable(player, true);
+    player.body.fixedRotation = true;
 
+    // Fix me?
+    // player.body.setCircle(20);
+    player.body.setRectangleFromSprite(player.name);
+
+    player.body.setCollisionGroup(playerCollisionGroup);
+    player.body.collideWorldBounds = true;
+    player.body.motionState = Phaser.Physics.P2.Body.STATIC;
+    player.body.onBeginContact.add(function(item){console.log("HIT")},this);
+    player.body.collides([missileCollisionGroup]);
+    game.physics.p2.updateBoundsCollisionGroup();
 
    return player;
   }
@@ -520,6 +525,8 @@ window.onload = function() {
 
       player1.angle += 1;
       player2.angle += 1;
+      player1.body.angle += 1;
+      player2.body.angle += 1;
   }
 
   function render () {
