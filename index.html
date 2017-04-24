@@ -140,6 +140,7 @@ window.onload = function() {
     game.load.spritesheet('player-02', 'assets/ShooterThing.png', 137, 148);
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
+    game.load.spritesheet('trail-02', 'assets/trail-02.png', 8, 8);
     //game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
     //game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
   }
@@ -158,12 +159,18 @@ window.onload = function() {
     }
   }
 
-  function createMissile (x,y,power, angle) {
+  function createMissile (player) {
 
-    var m = missiles.create(x, y, 'missle', 1);
-    m.name = 'missile';
+    var m = missiles.create(player.x, player.y, 'missle', 1);
+    m.name = 'missile-'+player.name;
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
+
+    if (player.name == 'player-02' ) {
+      m.trail = 'trail-02';
+    } else {
+      m.trail = 'trail';
+    }
 
     // ==== Gamelogic Data ===
     m.boosting = true;
@@ -172,16 +179,14 @@ window.onload = function() {
     // ==== Physics ===
     game.physics.p2.enable(m, physDebug);
     m.body.fixedRotation = true;
-    m.angle = angle;
-    m.body.angle = angle;
+    m.angle = player.angle;
+    m.body.angle = player.angle;
     m.body.setCircle(5);
     m.body.setCollisionGroup(missileCollisionGroup);
     m.body.collideWorldBounds = false;
     m.body.collides([missileCollisionGroup, planetCollisionGroup]);
 
-    console.log(power);
-    //m.body.thrust(power * 10000);
-    m.body.moveForward(power * 10);
+    m.body.moveForward(player.missile_power * 10);
 
     // ==== Animations ===
     m.animations.add('spawn', [0,1,2], 60, false);
@@ -261,11 +266,11 @@ window.onload = function() {
 
   function fireMissile ( player ) {
 
-    var p= new Phaser.Point(player.centerX, player.y - player.height/2);
+    var p = new Phaser.Point(player.centerX, player.y - player.height/2);
     // Rotate to match planet rotation.
     p.rotate(player.centerX, player.y, Phaser.Math.degToRad(player.angle));
 
-    sprite = createMissile(p.x, p.y, player.missile_power, player.angle);
+    sprite = createMissile(player);
     player.missile_power = 0;
     game.world.bringToTop(player);
 
@@ -381,10 +386,10 @@ window.onload = function() {
     }
   }
 
-  function createTrails (sprite) {
+  function createTrails (sprite ) {
 
-    var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
-    trail.name = 'trail';
+    var trail = trails.create(sprite.centerX, sprite.centerY, sprite.trail, 1);
+    trail.name = sprite.trail;
     trail.despawnTime = trailDespawnTime; //Miliseconds
     trail.scale.setTo(0.75,0.75)
     game.add.tween(trail).to(
