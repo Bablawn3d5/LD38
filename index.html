@@ -141,6 +141,8 @@ window.onload = function() {
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
     game.load.spritesheet('trail-02', 'assets/trail-02.png', 8, 8);
+    game.load.spritesheet('powerbar', 'assets/powerbar.png', 100, 20);
+    game.load.spritesheet('powerbar-progress', 'assets/powerbar-progress.png', 3, 20);
     //game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
     //game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
   }
@@ -276,6 +278,29 @@ window.onload = function() {
 
   }
 
+  function updatePowerbar( player ) {
+
+    var p = player.missile_power / 3;    // convert to percentage
+    if (p > 32 ) { p = 32 };             // clamp
+
+    player.powerbar_progress.scale.setTo( p, 1);
+    player.powerbar_progress.x = player.powerbar.x - (player.powerbar.width /2) + 2;
+  }
+
+  function createPowerbar (player){
+
+    powerbar = game.add.sprite(player.x  , player1.centerY + 60, 'powerbar');
+    powerbar.anchor.setTo(0.5,0.5);
+    powerbar.scale.setTo(1,1);
+    player.powerbar = powerbar;
+
+    powerbar_progress = game.add.sprite(powerbar.x - 30  , powerbar.centerY, 'powerbar-progress');
+    powerbar_progress.anchor.setTo(0,0.5);
+    player.powerbar_progress = powerbar_progress;
+
+    updatePowerbar(player);
+  }
+
   function create () {
     game.stage.backgroundColor = '#124184';
     game.time.advancedTiming = true;
@@ -358,6 +383,10 @@ window.onload = function() {
     player1 = createPlayer(300,game.world.centerY,1);
     player2 = createPlayer(game.width - 300, game.world.centerY,2);
 
+    // powerbar sprites
+    createPowerbar(player1);
+    createPowerbar(player2);
+
     // Bind coursr and keyboard events
     cursors = game.input.keyboard.createCursorKeys();
 
@@ -416,6 +445,7 @@ window.onload = function() {
   function update () {
 
     players.forEach(updateMissilePower);
+    players.forEach(updatePowerbar);
 
     missiles.forEach(createTrails, game);
     missiles.forEach(nuke_check, game);
@@ -453,6 +483,8 @@ window.onload = function() {
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
       game.debug.text("P1 Hold F to fire", player1.x - 16, game.height  - 20);
       game.debug.text("P2 Hold H to fire", player2.x - 16, game.height  - 20);
+      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
+      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
       if(sprite && sprite.body) {
         //misslesteering code.
         if (cursors.left.isDown)
@@ -480,12 +512,8 @@ window.onload = function() {
       }
     }
 
-      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
-      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
-
-
-      player1.angle += 1
-      player2.angle += 1
+      player1.angle += 1;
+      player2.angle += 1;
   }
 
   function render () {
