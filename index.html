@@ -130,13 +130,15 @@ window.onload = function() {
   function preload () {
     // This needs to be set to "anonymous" for it to work under CDNs
     game.load.crossOrigin = "Anonymous"
-    game.load.image('sprite', 'assets/Sprite-0001.png');
+    //game.load.image('sprite', 'assets/Sprite-0001.png');
     game.load.image('land', 'assets/planet.png');
     game.load.image('bg', 'assets/LoneGalaxy.png');
+    game.load.spritesheet('player-01', 'assets/ShooterThing.png', 137, 148);
+    game.load.spritesheet('player-02', 'assets/ShooterThing.png', 137, 148);
     game.load.spritesheet('missle', 'assets/Bullet.png', 60, 40);
     game.load.spritesheet('trail', 'assets/trail.png', 8, 8);
-    game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
-    game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
+    //game.load.spritesheet('player-01', 'assets/player-01.png', 32, 32);
+    //game.load.spritesheet('player-02', 'assets/player-02.png', 32, 32);
   }
 
   function checkSensors(bodyA,shapeA,shapeB,contactEquation){
@@ -159,7 +161,7 @@ window.onload = function() {
     m.name = 'missile';
     m.scale.setTo(0.5,0.5);
     m.anchor.setTo(0.5, 0.5);
-    m.creation = new Date().getTime() / 1000;
+    m.despawnTime = 2000; //Miliseconds
 
     // ==== Gamelogic Data ===
     m.boosting = true;
@@ -193,7 +195,7 @@ window.onload = function() {
     return m;
   }
 
- function updateMissilePower (player ){
+ function updateMissilePower (player){
   if ( player.fire_lock ) {
       if (player.missile_power < 100){
         player.missile_power += 40 * game.time.elapsed / 1000;
@@ -207,12 +209,16 @@ window.onload = function() {
  function createPlayer (x,y,number) {
 
     var player = players.create(x, y, 'player-0'+(number), 1);
+    player.anchor.setTo(0.5, 0.5);
+    player.scale.setTo(0.5, 0.5);
 
     player.name = 'player-0'+(number);
-    player.anchor.setTo(0.5, 0.5);
-    player.creation = new Date().getTime() / 1000;
     player.missile_power = 0;
     player.fire_lock = false;
+
+    // Antimations.
+    player.animations.add('idle', [0,1,2,3,4,3,2,1], 20, true);
+    player.animations.play('idle')
 
     // ==== Physics ===
    // game.physics.p2.enable(player, physDebug);
@@ -253,7 +259,12 @@ window.onload = function() {
   }
 
   function fireMissile ( player ) {
-    sprite = createMissile(player.centerX, player.centerY, player.missile_power, player.angle);
+
+    var p= new Phaser.Point(player.centerX, player.y - player.height/2);
+    // Rotate to match planet rotation.
+    p.rotate(player.centerX, player.y, Phaser.Math.degToRad(player.angle));
+
+    sprite = createMissile(p.x, p.y, player.missile_power, player.angle);
     player.missile_power = 0;
     game.world.bringToTop(player);
 
@@ -363,8 +374,8 @@ window.onload = function() {
   }
 
   function destroyTrails (sprite) {
-    var current = new Date().getTime() / 1000;
-    if ( current - sprite.creation > 2 ){
+    sprite.despawnTime -= game.time.elapsed;
+    if ( sprite.despawnTime <= 0 ){
       sprite.destroy();
     }
   }
@@ -373,17 +384,17 @@ window.onload = function() {
 
     var trail = trails.create(sprite.centerX, sprite.centerY, 'trail', 1);
     trail.name = 'trail';
-    trail.creation = new Date().getTime() / 1000;
+    trail.despawnTime = 2000; //Miliseconds
     game.add.tween(trail).to(
         /*properties*/{alpha: 0},
-        /*duration*/2000,
+        /*duration*/trail.despawnTime,
         Phaser.Easing.Linear.None ,
         /*autostart*/true,
         /*delay*/ 0,
         /*repeat*/0);
     game.add.tween(trail.scale).to(
         /*properties*/{x: 0, y: 0},
-        /*duration*/2000,
+        /*duration*/trail.despawnTime,
         Phaser.Easing.Linear.None ,
         /*autostart*/true,
         /*delay*/ 0,
