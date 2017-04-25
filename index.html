@@ -514,6 +514,8 @@ window.onload = function() {
 
   function update () {
 
+    if ( gameOver ) { return }
+
     players.forEach(updateMissilePower);
     players.forEach(updatePowerbar);
 
