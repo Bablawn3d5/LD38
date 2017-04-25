@@ -33,6 +33,10 @@ window.onload = function() {
   var playerCollisionGroup;
   var spacebar;
   var gameOver = false;
+  var tooltip1;
+  var tooltip2;
+  var tooltips = [];
+  var has_fired = false;
 
   //config
   var physDebug = false;
@@ -226,7 +230,6 @@ window.onload = function() {
  function winCheck ( player ) {
 
   if (player.lives.length <= 0 && !gameOver){
-      console.log(player.name);
       var winner;
       if ( player.name == 'player-01') { winner = 'Player 2'; }
         else { winner = 'Player 1' }
@@ -327,6 +330,7 @@ window.onload = function() {
   }
 
   function fireMissile ( player ) {
+    has_fired = true;
 
     var p = new Phaser.Point(player.centerX, player.y - player.height/2);
     // Rotate to match planet rotation.
@@ -339,6 +343,7 @@ window.onload = function() {
   }
 
   function updatePowerbar( player ) {
+
 
     var p = player.missile_power / 3;    // convert to percentage
     if (p > 32 ) { p = 32 };             // clamp
@@ -357,6 +362,7 @@ window.onload = function() {
     powerbar_progress = game.add.sprite(powerbar.x - 30  , powerbar.centerY, 'powerbar-progress');
     powerbar_progress.anchor.setTo(0,0.5);
     player.powerbar_progress = powerbar_progress;
+
 
     updatePowerbar(player);
   }
@@ -467,6 +473,34 @@ window.onload = function() {
     var three = game.input.keyboard.addKey(Phaser.Keyboard.THREE);
     two.onDown.add(toggleDebugLogging, game);
 
+    // Tooltips
+
+    // Tips-text
+    var tooltip1 = game.add.text( player1.x, player1.centerY + 63, 'Press F to fire');
+    var tooltip2 =  game.add.text( player2.x, player2.centerY + 63, 'Press H to fire');
+
+    tooltip1.anchor.set(0.5);
+    tooltip1.align = 'center';
+
+    tooltip1.font = 'Arial Black';
+    tooltip1.fontSize = 12;
+    tooltip1.fontWeight = 'bold';
+
+    tooltip1.fill = '#ffffff';
+    tooltip1.setShadow(1, 1, 'rgba(0,0,0,1)', 1);
+
+    tooltip2.anchor.set(0.5);
+    tooltip2.align = 'center';
+
+    tooltip2.font = 'Arial Black';
+    tooltip2.fontSize = 12;
+    tooltip2.fontWeight = 'bold';
+
+    tooltip2.fill = '#ffffff';
+    tooltip2.setShadow(1, 1, 'rgba(0,0,0,1)', 1);
+
+    tooltips.push(tooltip1);
+    tooltips.push(tooltip2);
     // Logging
     debugLog(game)
   }
@@ -516,6 +550,11 @@ window.onload = function() {
 
     if ( gameOver ) { return }
 
+    if (has_fired && tooltips.length > 0 ){
+      var t = tooltips.pop();
+      t.destroy();
+    }
+
     players.forEach(updateMissilePower);
     players.forEach(updatePowerbar);
 
@@ -555,8 +594,6 @@ window.onload = function() {
       game.debug.text("Colliding?: "+ is_colliding, 0, 380);
       game.debug.text("P1 Hold F to fire", player1.x - 16, game.height  - 20);
       game.debug.text("P2 Hold H to fire", player2.x - 16, game.height  - 20);
-      game.debug.text("Power: "+ player1.missile_power, player1.x - 16, player1.centerY + 40);
-      game.debug.text("Power: "+ player2.missile_power, player2.x - 16, player2.centerY + 40);
       if(sprite && sprite.body) {
         //misslesteering code.
         if (cursors.left.isDown)
