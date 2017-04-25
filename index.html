@@ -32,6 +32,7 @@ window.onload = function() {
   var planetCollisionGroup;
   var playerCollisionGroup;
   var spacebar;
+  var gameOver = false;
 
   //config
   var physDebug = false;
@@ -190,10 +191,10 @@ window.onload = function() {
     m.body.collideWorldBounds = false;
     m.body.collides([missileCollisionGroup, planetCollisionGroup, playerCollisionGroup]);
     m.body.onEndContact.add(function(game, item){
-                              if (item.parent.name != m.name) {
-                                m.destroy();
-                              }
-                            },this);
+      if (item.parent.name != m.name) {
+        m.destroy();
+      }
+    },this);
     m.body.name = player.name;
 
     m.body.moveForward(player.missile_power * 10);
@@ -221,6 +222,31 @@ window.onload = function() {
       }
   }
  }
+
+ function winCheck ( player ) {
+
+  if (player.lives.length <= 0 && !gameOver){
+      console.log(player.name);
+      var winner;
+      if ( player.name == 'player-01') { winner = 'Player 2'; }
+        else { winner = 'Player 1' }
+
+      var t = game.add.text(game.world.centerX,
+        game.world.centerY,
+        winner +' wins!');
+
+      t.anchor.set(0.5);
+      t.align = 'center';
+
+      t.font = 'Arial Black';
+      t.fontSize = 72;
+      t.fontWeight = 'bold';
+      t.fill = '#ffffff';
+      t.setShadow(10, 10, 'rgba(0,0,0,1)', 10);
+
+      gameOver = true;
+    }
+  }
 
  function createPlayer (x,y,number) {
 
@@ -264,29 +290,12 @@ window.onload = function() {
     player.body.mass= 0;
     player.body.name = player.name;
     player.body.collides([missileCollisionGroup], function(g, missile){
-                                               if ( player.lives.length > 0  && player.name != missile.name ){
-                                                var h = player.lives.pop();
-                                                h.destroy();
-                                              } else if ( player.lives.length > 0 ){}
-                                              else {
-                                                var winner;
-                                                if ( player.name = 'player-01') {
-                                                  winner = 'player-02';
-                                                } else { winner = 'player-01' }
-                                                  var t = game.add.text(game.world.centerX,
-                                                  game.world.centerY,
-                                                  winner +' wins!');
-                                                  t.anchor.set(0.5);
-                                                  t.align = 'center';
-
-                                                  t.font = 'Arial Black';
-                                                  t.fontSize = 72;
-                                                  t.fontWeight = 'bold';
-                                                  t.fill = '#ffffff';
-                                                  t.setShadow(10, 10, 'rgba(0,0,0,1)', 10);
-                                             }
-                                    },this
-                                  );
+                       if ( player.lives.length > 0  && player.name != missile.name ){
+                          var h = player.lives.pop();
+                          h.destroy();
+                        }
+                        winCheck(player);
+                      },this);
     game.physics.p2.updateBoundsCollisionGroup();
 
    return player;
