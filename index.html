@@ -45,7 +45,9 @@ window.onload = function() {
   var backgroundSpeed = 120000; //higher is slower.
   var planetSpinSpeed = 124000; //higher is slower
   var trailDespawnTime = 6000;
-  var misslePowerGainPerMS = 0.1289;
+  var misslePowerGainPerMS = 0.4589;
+  var HEART_SPACING = 2;
+  var HEART_TOTAL = 50;
 
   function init() {
     game.renderer.renderSession.roundPixels = true;
@@ -262,8 +264,8 @@ window.onload = function() {
     player.fire_lock = false;
     player.lives = [];
 
-    for ( var i = 0; i < 6; i++ ){
-       player.lives.push( game.add.sprite(player.x + (i * 16) - 50  , player.centerY + 70, 'heart'));
+    for ( var i = 0; i < HEART_TOTAL; i++ ){
+       player.lives.push( game.add.sprite(player.x + (i * HEART_SPACING) - 50  , player.centerY + 70, 'heart'));
     }
 
     // Antimations.
